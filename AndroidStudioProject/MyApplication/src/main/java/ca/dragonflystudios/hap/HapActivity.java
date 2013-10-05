@@ -1,159 +1,191 @@
+/*
+ * Copyright (C) 2007 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package ca.dragonflystudios.hap;
 
-import ca.dragonflystudios.hap.util.SystemUiHider;
-
-import android.annotation.TargetApi;
 import android.app.Activity;
-import android.os.Build;
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Path;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.MotionEvent;
 import android.view.View;
 
-/**
- * An example full-screen activity that shows and hides the system UI (i.e.
- * status bar and navigation/system bar) with user interaction.
- *
- * @see SystemUiHider
- */
 public class HapActivity extends Activity {
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
+    private SensorManager mSensorManager;
+    private GraphView mGraphView;
 
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+    private class GraphView extends View implements SensorEventListener {
+        private Bitmap mBitmap;
+        private Paint mPaint = new Paint();
+        private Canvas mCanvas = new Canvas();
+        private Path mPath = new Path();
+        private float mLastValues[] = new float[3];
+        private int mColors[] = new int[3];
+        private float mLastX;
+        private float mScale;
+        private float mYOffset;
+        private float mMaxX;
+        private float mSpeed = 0.2f;
+        private float mWidth;
+        private float mHeight;
 
-    /**
-     * If set, will toggle the system UI visibility upon interaction. Otherwise,
-     * will show the system UI visibility upon interaction.
-     */
-    private static final boolean TOGGLE_ON_CLICK = true;
+        public GraphView(Context context) {
+            super(context);
+            mColors[0] = Color.argb(255, 255, 0, 0);
+            mColors[1] = Color.argb(255, 0, 255, 0);
+            mColors[2] = Color.argb(255, 0, 0, 255);
 
-    /**
-     * The flags to pass to {@link SystemUiHider#getInstance}.
-     */
-    private static final int HIDER_FLAGS = SystemUiHider.FLAG_HIDE_NAVIGATION;
+            mPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+        }
 
-    /**
-     * The instance of the {@link SystemUiHider} for this activity.
-     */
-    private SystemUiHider mSystemUiHider;
+        @Override
+        protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+            mBitmap = Bitmap.createBitmap(w, h, Bitmap.Config.RGB_565);
+            mCanvas.setBitmap(mBitmap);
+            mCanvas.drawColor(0x00000000);
+            mYOffset = h * 0.5f;
+            mScale = -(h * 0.5f * (1.0f / (SensorManager.STANDARD_GRAVITY * 2)));
+            mWidth = w;
+            mHeight = h;
+            if (mWidth < mHeight) {
+                mMaxX = w;
+            } else {
+                mMaxX = w - 50;
+            }
+            mLastX = mMaxX;
+            super.onSizeChanged(w, h, oldw, oldh);
+        }
+
+        @Override
+        protected void onDraw(Canvas canvas) {
+            synchronized (this) {
+                if (mBitmap != null) {
+                    final Paint paint = mPaint;
+                    final Path path = mPath;
+                    final int outer = 0xFFC0C0C0;
+                    final int inner = 0xFFff7010;
+
+                    if (mLastX >= mMaxX) {
+                        mLastX = 0;
+                        final Canvas cavas = mCanvas;
+                        final float yoffset = mYOffset;
+                        final float maxx = mMaxX;
+                        final float oneG = SensorManager.STANDARD_GRAVITY * mScale;
+                        paint.setColor(0xFFAAAAAA);
+                        cavas.drawColor(0xFFFFFFFF);
+                        cavas.drawLine(0, yoffset, maxx, yoffset, paint);
+                        cavas.drawLine(0, yoffset + oneG, maxx, yoffset + oneG, paint);
+                        cavas.drawLine(0, yoffset - oneG, maxx, yoffset - oneG, paint);
+                    }
+                    canvas.drawBitmap(mBitmap, 0, 0, null);
+
+                    if (mWidth < mHeight) {
+                        float w0 = mWidth * 0.333333f;
+                        float w = w0 - 32;
+                        float x = w0 * 0.5f;
+                        for (int i = 0; i < 3; i++) {
+                            canvas.save(Canvas.MATRIX_SAVE_FLAG);
+                            canvas.translate(x, w * 0.5f + 4.0f);
+                            canvas.save(Canvas.MATRIX_SAVE_FLAG);
+                            paint.setColor(outer);
+                            canvas.scale(w, w);
+                            canvas.restore();
+                            canvas.scale(w - 5, w - 5);
+                            paint.setColor(inner);
+                            canvas.drawPath(path, paint);
+                            canvas.restore();
+                            x += w0;
+                        }
+                    } else {
+                        float h0 = mHeight * 0.333333f;
+                        float h = h0 - 32;
+                        float y = h0 * 0.5f;
+                        for (int i = 0; i < 3; i++) {
+                            canvas.save(Canvas.MATRIX_SAVE_FLAG);
+                            canvas.translate(mWidth - (h * 0.5f + 4.0f), y);
+                            canvas.save(Canvas.MATRIX_SAVE_FLAG);
+                            paint.setColor(outer);
+                            canvas.scale(h, h);
+                            canvas.restore();
+                            canvas.scale(h - 5, h - 5);
+                            paint.setColor(inner);
+                            canvas.drawPath(path, paint);
+                            canvas.restore();
+                            y += h0;
+                        }
+                    }
+
+                }
+            }
+        }
+
+        public void onSensorChanged(SensorEvent event) {
+            synchronized (this) {
+                if (mBitmap != null) {
+                    final Canvas canvas = mCanvas;
+                    final Paint paint = mPaint;
+                    float deltaX = mSpeed;
+                    float newX = mLastX + deltaX;
+
+                    if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+                        for (int i = 0; i < 3; i++) {
+                            final float v = mYOffset + event.values[i] * mScale;
+                            paint.setColor(mColors[i]);
+                            canvas.drawLine(mLastX, mLastValues[i], newX, v, paint);
+                            mLastValues[i] = v;
+                        }
+                        mLastX += mSpeed;
+                    }
+                    invalidate();
+                }
+            }
+        }
+
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // Be sure to call the super class.
         super.onCreate(savedInstanceState);
 
-        setContentView(R.layout.activity_fullscreen);
-
-        final View controlsView = findViewById(R.id.fullscreen_content_controls);
-        final View contentView = findViewById(R.id.fullscreen_content);
-
-        // Set up an instance of SystemUiHider to control the system UI for
-        // this activity.
-        mSystemUiHider = SystemUiHider.getInstance(this, contentView, HIDER_FLAGS);
-        mSystemUiHider.setup();
-        mSystemUiHider
-                .setOnVisibilityChangeListener(new SystemUiHider.OnVisibilityChangeListener() {
-                    // Cached values.
-                    int mControlsHeight;
-                    int mShortAnimTime;
-
-                    @Override
-                    @TargetApi(Build.VERSION_CODES.HONEYCOMB_MR2)
-                    public void onVisibilityChange(boolean visible) {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB_MR2) {
-                            // If the ViewPropertyAnimator API is available
-                            // (Honeycomb MR2 and later), use it to animate the
-                            // in-layout UI controls at the bottom of the
-                            // screen.
-                            if (mControlsHeight == 0) {
-                                mControlsHeight = controlsView.getHeight();
-                            }
-                            if (mShortAnimTime == 0) {
-                                mShortAnimTime = getResources().getInteger(
-                                        android.R.integer.config_shortAnimTime);
-                            }
-                            controlsView.animate()
-                                    .translationY(visible ? 0 : mControlsHeight)
-                                    .setDuration(mShortAnimTime);
-                        } else {
-                            // If the ViewPropertyAnimator APIs aren't
-                            // available, simply show or hide the in-layout UI
-                            // controls.
-                            controlsView.setVisibility(visible ? View.VISIBLE : View.GONE);
-                        }
-
-                        if (visible && AUTO_HIDE) {
-                            // Schedule a hide().
-                            delayedHide(AUTO_HIDE_DELAY_MILLIS);
-                        }
-                    }
-                });
-
-        // Set up the user interaction to manually show or hide the system UI.
-        contentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (TOGGLE_ON_CLICK) {
-                    mSystemUiHider.toggle();
-                } else {
-                    mSystemUiHider.show();
-                }
-            }
-        });
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mGraphView = new GraphView(this);
+        setContentView(mGraphView);
     }
 
     @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100);
+    protected void onResume() {
+        super.onResume();
+        mSensorManager.registerListener(mGraphView,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
+                SensorManager.SENSOR_DELAY_FASTEST);
     }
 
-
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-    View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
-        }
-    };
-
-    Handler mHideHandler = new Handler();
-    Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            mSystemUiHider.hide();
-        }
-    };
-
-    /**
-     * Schedules a call to hide() in [delay] milliseconds, canceling any
-     * previously scheduled calls.
-     */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
+    @Override
+    protected void onPause() {
+        mSensorManager.unregisterListener(mGraphView);
+        super.onStop();
     }
 }
