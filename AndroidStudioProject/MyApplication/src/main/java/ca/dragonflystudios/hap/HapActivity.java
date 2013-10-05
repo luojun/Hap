@@ -28,13 +28,112 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 
 public class HapActivity extends Activity {
     private SensorManager mSensorManager;
     private GraphView mGraphView;
+    private AcceGyroHost mAcceGryoHost;
 
-    private class GraphView extends View implements SensorEventListener {
+    public static class AcceGyro {
+        public interface AccelerationObserver {
+            public void onUpdateAccleration(float[] acceleration);
+        }
+
+        public interface AngularSpeedObserver {
+            public void onUpdateAngularSpeed(float[] angularSpeed);
+        }
+
+        public interface AcceGyroObserver {
+            public void onUpdate(float[] acceleration, float[] angularSpeed);
+        }
+
+
+        private AccelerationObserver mAccelerationObserver;
+        private AngularSpeedObserver mAngularSpeedObserver;
+        private AcceGyroObserver mAcceGyroObserver;
+
+        public AcceGyro(AcceGyroObserver o) {
+            mAcceGyroObserver = o;
+        }
+
+        public AcceGyro(AccelerationObserver aco, AngularSpeedObserver aso) {
+            mAccelerationObserver = aco;
+            mAngularSpeedObserver = aso;
+        }
+
+        public static final float ALPHA = 0.8f;
+        public static final int DOF = 3;
+
+        private final float[] mGravity = new float[DOF];
+        private final float[] mAcceleration = new float[DOF];
+        private final float[] mAngularSpeed = new float[DOF];
+
+        public boolean update(SensorEvent event) {
+            switch (event.sensor.getType()) {
+                case Sensor.TYPE_ACCELEROMETER:
+                    updateAcceleration(event);
+                    break;
+                case Sensor.TYPE_GYROSCOPE:
+                    updateAngularSpeed(event);
+                    break;
+                default:
+                    return false;
+            }
+
+            if (null != mAcceGyroObserver)
+                mAcceGyroObserver.onUpdate(mAcceleration, mAngularSpeed);
+
+            return true;
+        }
+
+        private void updateAcceleration(SensorEvent event) {
+            for (int i = 0; i < DOF; i++) {
+                mGravity[i] = ALPHA * mGravity[i] + (1 - ALPHA) * event.values[i];
+                mAcceleration[i] = event.values[i] - mGravity[i];
+                Log.d(getClass().getName(), "Acceleration: " + ((i == 0) ? "    x = " : ((i == 1) ? "    y = " : "    z = ")) + event.values[i]);
+            }
+            if (null != mAccelerationObserver)
+                mAccelerationObserver.onUpdateAccleration(mAcceleration);
+        }
+
+        private void updateAngularSpeed(SensorEvent event) {
+            for (int i = 0; i < DOF; i++) {
+                mAngularSpeed[0] = event.values[0];
+                Log.d(getClass().getName(), "Angular Speed: " + ((i == 0) ? "    x = " : ((i == 1) ? "    y = " : "    z = ")) + event.values[i]);
+            }
+            if (null != mAngularSpeedObserver)
+                mAngularSpeedObserver.onUpdateAngularSpeed(mAngularSpeed);
+        }
+
+        public float[] getAcceleration() {
+            return mAcceleration;
+        }
+
+        public float[] getAngularSpeed() {
+            return mAngularSpeed;
+        }
+    }
+
+    public static class AcceGyroHost implements SensorEventListener {
+        private AcceGyro mAcceGyro;
+
+        public AcceGyroHost(AcceGyro.AcceGyroObserver observer) {
+            mAcceGyro = new AcceGyro(observer);
+        }
+
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            mAcceGyro.update(event);
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+        }
+    }
+
+    private class GraphView extends View implements AcceGyro.AcceGyroObserver {
         private Bitmap mBitmap;
         private Paint mPaint = new Paint();
         private Canvas mCanvas = new Canvas();
@@ -139,7 +238,7 @@ public class HapActivity extends Activity {
             }
         }
 
-        public void onSensorChanged(SensorEvent event) {
+        public void onUpdate(float[] acceleration, float[] angularSpeed) {
             synchronized (this) {
                 if (mBitmap != null) {
                     final Canvas canvas = mCanvas;
@@ -147,21 +246,18 @@ public class HapActivity extends Activity {
                     float deltaX = mSpeed;
                     float newX = mLastX + deltaX;
 
-                    if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
-                        for (int i = 0; i < 3; i++) {
-                            final float v = mYOffset + event.values[i] * mScale;
-                            paint.setColor(mColors[i]);
-                            canvas.drawLine(mLastX, mLastValues[i], newX, v, paint);
-                            mLastValues[i] = v;
-                        }
-                        mLastX += mSpeed;
+                    for (int i = 0; i < 3; i++) {
+                        final float v = mYOffset + acceleration[i] * mScale;
+                        paint.setColor(mColors[i]);
+                        canvas.drawLine(mLastX, mLastValues[i], newX, v, paint);
+                        mLastValues[i] = v;
                     }
+                    mLastX += mSpeed;
+
                     invalidate();
                 }
-            }
-        }
 
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+            }
         }
     }
 
@@ -172,20 +268,24 @@ public class HapActivity extends Activity {
 
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mGraphView = new GraphView(this);
+        mAcceGryoHost = new AcceGyroHost(mGraphView);
         setContentView(mGraphView);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mSensorManager.registerListener(mGraphView,
+        mSensorManager.registerListener(mAcceGryoHost,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
-                SensorManager.SENSOR_DELAY_FASTEST);
+                SensorManager.SENSOR_DELAY_NORMAL);
+        mSensorManager.registerListener(mAcceGryoHost,
+                mSensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE),
+                SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     protected void onPause() {
-        mSensorManager.unregisterListener(mGraphView);
-        super.onStop();
+        mSensorManager.unregisterListener(mAcceGryoHost);
+        super.onPause();
     }
 }
