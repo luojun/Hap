@@ -1,0 +1,19 @@
+WiiGee open source lib:
+http://www.wiigee.org/
+
+DTW (stackoverflow):
+http://biblio.telecom-paristech.fr/cgi-bin/download.cgi?id=11558
+
+Papers:
+http://cs.fit.edu/~pkc/papers/tdm04.pdf
+http://www2.ic.uff.br/~esteban/files/papers/SBGames09_Mark_A.pdf
+http://www.cs.sjsu.edu/faculty/pollett/masters/Semesters/Spring08/neel/parikh_neel
+http://www.ruf.rice.edu/~mobile/publications/liu09percom.pdf
+http://oa.upm.es/16199/1/INVE_MEM_2012_132745.pdf
+http://biblio.telecom-paristech.fr/cgi-bin/download.cgi?id=11558
+
+Sensor Music Player app:
+http://techotv.com/change-songs-without-touching-android-phone-gesture-sensor-music-player-review/
+
+Some Graphed Data:
+http://www.slideshare.net/paller/motion-recognition-with-android-devices
