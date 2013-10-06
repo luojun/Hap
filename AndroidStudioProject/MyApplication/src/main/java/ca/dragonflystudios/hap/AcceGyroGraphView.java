@@ -5,11 +5,13 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.hardware.SensorManager;
 import android.view.View;
 
-public class AcceGyroGraphView extends View implements AcceGyro.AcceGyroObserver {
+import java.util.Observable;
+import java.util.Observer;
+
+public class AcceGyroGraphView extends View implements Observer {
 
     private final static int BACKGROUND_COLOR = 0xFF000000;
     private final static int LINE_COLOR = 0xFFAAAAAA;
@@ -78,9 +80,10 @@ public class AcceGyroGraphView extends View implements AcceGyro.AcceGyroObserver
     }
 
     @Override
-    public void onUpdate(float[] acceleration, float[] angularSpeed) {
+    public void update(Observable observable, Object data) {
         synchronized (this) {
             if (mBitmap != null) {
+                final float[] values = (float[]) data;
                 final Canvas canvas = mCanvas;
                 final Paint paint = mPaint;
                 float newX = mLastX + STEP_SIZE;
@@ -88,11 +91,11 @@ public class AcceGyroGraphView extends View implements AcceGyro.AcceGyroObserver
                 for (int i = 0; i < 3; i++) {
                     paint.setColor(mColors[i]);
 
-                    final float vAcc = mYOffsetAcceleration[i] + acceleration[i] * mScale;
+                    final float vAcc = mYOffsetAcceleration[i] + values[i] * mScale;
                     canvas.drawLine(mLastX, mLastValuesAcceleration[i], newX, vAcc, paint);
                     mLastValuesAcceleration[i] = vAcc;
 
-                    final float vAng = mYOffsetAngularSpeed[i] + angularSpeed[i] * mScale;
+                    final float vAng = mYOffsetAngularSpeed[i] + values[i + AcceGyro.DOF] * mScale;
                     canvas.drawLine(mLastX, mLastValuesAngularSpeed[i], newX, vAng, paint);
                     mLastValuesAngularSpeed[i] = vAng;
                 }
