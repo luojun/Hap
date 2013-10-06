@@ -1,11 +1,30 @@
 package ca.dragonflystudios.hap;
 
+import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.util.Observable;
 import java.util.Observer;
 
 public class GyroGestureRecognizer implements Observer {
+
+    public static final String NAVIGATION_ACTION = "hap_navigation_action";
+
+    public enum GyroGesture {
+        DOWN(0), UP(1), RIGHT(2), LEFT(3), COUNTERCLOCKWISE(4), CLOCKWISE(5);
+
+        private final int ordinal;
+        GyroGesture(int n) {
+            ordinal = n;
+        }
+
+        private static GyroGesture[] allValues = values();
+        public static GyroGesture getGesture(int dim, float value) {
+            return allValues[dim * 2 + ((value >= 0f) ? 1 : 0)];
+        }
+     }
 
     public static final float RECOGNITION_THRESHOLD = 0.4f;
     public static final float IDLE_THRESHOLD = 0.1f;
@@ -15,12 +34,14 @@ public class GyroGestureRecognizer implements Observer {
         IDLE, RETURNING
     }
 
+    private LocalBroadcastManager mLocalBroadcastManager;
     private RecognizerState mState = RecognizerState.IDLE;
     private int mDimOfMax = 0;
 
-    public GyroGestureRecognizer() {
+    public GyroGestureRecognizer(Context context) {
         mState = RecognizerState.IDLE;
         mDimOfMax = 0;
+        mLocalBroadcastManager = LocalBroadcastManager.getInstance(context);
     }
 
     @Override
@@ -43,6 +64,7 @@ public class GyroGestureRecognizer implements Observer {
 
                 if (maxAbs > RECOGNITION_THRESHOLD && (maxAbs - medAbs) > DIFF_THRESHOLD) {
                     Log.w(getClass().getName(), "recognized: " + mDimOfMax + "; " + values[mDimOfMax]);
+                    mLocalBroadcastManager.sendBroadcast(new Intent().setAction(NAVIGATION_ACTION).putExtra("TYPE", "gyro_gesture").putExtra("VALUE", GyroGesture.getGesture(mDimOfMax, values[mDimOfMax]).name()));
                     mState = RecognizerState.RETURNING;
                 }
                 break;
