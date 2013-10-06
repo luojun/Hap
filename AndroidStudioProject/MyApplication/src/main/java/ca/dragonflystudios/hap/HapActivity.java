@@ -5,10 +5,11 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 
 public class HapActivity extends Activity {
-    private static final boolean LOG = true;
+    private static final boolean LOG = false;
     private AcceGyroGraphView mGraphView;
     private AcceGyro.Logger mLogger;
     private AcceGyro mAcceGyro;
+    private GyroGestureRecognizer mRecognizer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -16,7 +17,9 @@ public class HapActivity extends Activity {
 
         mGraphView = new AcceGyroGraphView(this);
         mAcceGyro = new AcceGyro((SensorManager) getSystemService(SENSOR_SERVICE));
+        mRecognizer = new GyroGestureRecognizer();
         mAcceGyro.addObserver(mGraphView);
+        mAcceGyro.addObserver(mRecognizer);
         if (BuildConfig.DEBUG && LOG) {
             mLogger = new AcceGyro.Logger();
             mAcceGyro.addObserver(mLogger);
@@ -38,9 +41,7 @@ public class HapActivity extends Activity {
 
     @Override
     protected void onDestroy() {
-        mAcceGyro.deleteObserver(mGraphView);
-        if (BuildConfig.DEBUG && LOG)
-            mAcceGyro.deleteObserver(mLogger);
+        mAcceGyro.deleteObservers();
         super.onDestroy();
     }
 }
