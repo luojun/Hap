@@ -18,17 +18,35 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class SyncService extends IntentService {
+public class DsSyncService extends IntentService {
 
-    public SyncService() {
+    public DsSyncService() {
         super("Sync Service");
     }
 
+    public static final String KEY_URL = "ds_url";
+    public static final String KEY_URI = "ds_uri";
+    public static final String KEY_CONTENTS_PATH = "ds_contents_path";
+    public static final String KEY_KEY_STRINGS = "ds_key_strings";
+    public static final String KEY_VALUE_PATH_KEYS = "ds_value_path_keys";
+
+    @Override
     protected void onHandleIntent(Intent intent) {
         final Bundle extras = intent.getExtras();
-        ContentResolver cr = getContentResolver();
+        final ContentResolver cr = getContentResolver();
 
-//        cr.bulkInsert(uri, cvs);
+        final String url = extras.getString(KEY_URL);
+        final Uri uri = Uri.parse(extras.getString(KEY_URI));
+        final JsonPath contentsPath = new JsonPath(extras.getStringArray(KEY_CONTENTS_PATH));
+        final String[] keyStrings = extras.getStringArray(KEY_KEY_STRINGS);
+
+        final String[] valuePathKeys = extras.getStringArray(KEY_VALUE_PATH_KEYS);
+        final JsonPath[] valuePaths = new JsonPath[valuePathKeys.length];
+        for (int i = 0; i < valuePaths.length; i++)
+            valuePaths[i] = new JsonPath(extras.getStringArray(valuePathKeys[i]));
+
+        final ContentValues[] contents = getContentsFromUrl(url, uri, contentsPath, keyStrings, valuePaths);
+        cr.bulkInsert(uri, contents);
         return;
     }
 
