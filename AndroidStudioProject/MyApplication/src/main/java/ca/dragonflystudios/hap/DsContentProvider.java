@@ -72,7 +72,12 @@ public class DsContentProvider extends ContentProvider {
             for (Collection collection : collections)
                 addCollection(collection);
             sModels.add(mModelIndex, this);
+        }
 
+        public boolean initializeDb(Context context) {
+            Model.ModelDbOpenHelper helper = new ModelDbOpenHelper(context, this);
+            database = helper.getWritableDatabase();
+            return (null != database);
         }
 
         private static class ModelDbOpenHelper extends SQLiteOpenHelper {
@@ -200,8 +205,6 @@ public class DsContentProvider extends ContentProvider {
     public Uri insert(Uri uri, ContentValues values) {
         ModelCollectionPair pair = decodeUri(uri);
 
-        /* Check to see if the unique GUID is already in table */
-        // TODO: deal with uniqueness
         Cursor c = pair.model.database.rawQuery("SELECT * FROM " + pair.collection.name + " WHERE _id = '" + values.getAsString("_id") + "'", null);
         try {
             if (c.moveToFirst()) {
@@ -231,13 +234,11 @@ public class DsContentProvider extends ContentProvider {
 
         db.beginTransaction();
         try {
-            // insertWithOnConflict is tricky (with CONFLICT_IGNORE): https://code.google.com/p/android/issues/detail?id=13045
             for (ContentValues v : values)
                 if (null != v) {
-                    // TODO: make "inserted" work!
                     long ret = db.insertWithOnConflict(tableName, null, v, SQLiteDatabase.CONFLICT_IGNORE);
                     // long ret = db.insert(tableName, null, v); // Use this version for debugging, because exception will be thrown (in contrast to the version above)
-                    Log.d(getClass().getName(), "insert to " + tableName + " retruns: " + ret);
+                    Log.d(getClass().getName(), "insert to " + tableName + " returns: " + ret);
                     if (-1 != ret)
                         inserted = true;
                 }
@@ -254,20 +255,15 @@ public class DsContentProvider extends ContentProvider {
 
     @Override
     public boolean onCreate() {
-/*
-        // Figure this out!
-        for (Model model : Model.sModels) {
-            Model.ModelDbOpenHelper helper = new Model.ModelDbOpenHelper(getContext(), C.models[i]);
-            mDbs[i] = helper.getWritableDatabase();
-            if (null == mDbs[i])
+        for (Model model : Model.sModels)
+            if (!model.initializeDb(getContext()))
                 return false;
-        }
-*/
         return true;
     }
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        // Trigger downloading ...
         ModelCollectionPair pair = decodeUri(uri);
         String tableName = pair.collection.name;
 
@@ -288,5 +284,4 @@ public class DsContentProvider extends ContentProvider {
 
         return count;
     }
-
 }
