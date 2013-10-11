@@ -4,6 +4,7 @@ import android.content.ContentProvider;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.Intent;
 import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -22,6 +23,7 @@ public class DsContentProvider extends ContentProvider {
 
     public static class Model {
         public static ArrayList<Model> sModels = new ArrayList<Model>();
+
         public static Model getModel(int index) {
             return sModels.get(index);
         }
@@ -29,11 +31,13 @@ public class DsContentProvider extends ContentProvider {
         public static final int MAX_COLLECTIONS = 1024;
 
         private static final AtomicInteger sNextModelIndex = new AtomicInteger(0);
+
         private static int getNextModelIndex() {
             return sNextModelIndex.getAndIncrement();
         }
 
         private final AtomicInteger mNextCollectionIndex;
+
         private int getNextCollectionIndex() {
             int index = mNextCollectionIndex.getAndIncrement();
             if (index >= MAX_COLLECTIONS)
@@ -112,8 +116,8 @@ public class DsContentProvider extends ContentProvider {
         private int mIndex;
         public String name;
         public String url;
-        public String[] contentsPath;
-        public String[][] valuePaths;
+        public DsSyncService.JsonPath contentsPath;
+        public DsSyncService.JsonPath[] valuePaths;
         public String[] columnNames;
 
 
@@ -125,12 +129,16 @@ public class DsContentProvider extends ContentProvider {
             return mIndex;
         }
 
-        public Collection(String name, String url, String[] contentsPath, String[][] valuePaths, String[] columnNames) {
+        public Collection(String name, String[] columnNames, String url, DsSyncService.JsonPath contentsPath, DsSyncService.JsonPath[] valuePaths) {
             this.name = name;
             this.url = url;
             this.contentsPath = contentsPath;
             this.valuePaths = valuePaths;
             this.columnNames = columnNames;
+        }
+
+        public Uri getUri() {
+            return Uri.parse("content://" + getModel().authority + "/" + name);
         }
 
         protected void setModel(Model model, int index) {
@@ -167,23 +175,33 @@ public class DsContentProvider extends ContentProvider {
         }
     }
 
-    private static class ModelCollectionPair {
-        public Model model;
-        public Collection collection;
+    private static Collection NprLineups = new Collection("lineup", new String[]{"_id", "title", "description"},
+                "http://api.npr.org/list?id=3002&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("item"),
+                new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new  DsSyncService.JsonPath("additionalInfo", "$text")});
 
-        ModelCollectionPair (Model model, Collection collection) {
+    private static Collection NprNewsItems = new Collection("news_items", new String[]{"_id", "title", "teaser", "date" },
+                "http://api.npr.org/query?id=%s&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("list", "story"),
+                new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("pubDate", "$text")});
+
+    private static Model NprModel = new Model("NPR News", "api.npr.org", 1, new Collection[] { NprLineups, NprNewsItems });
+
+    public static class ModelCollectionPair {
+        public DsContentProvider.Model model;
+        public DsContentProvider.Collection collection;
+
+        ModelCollectionPair(DsContentProvider.Model model, DsContentProvider.Collection collection) {
             this.model = model;
             this.collection = collection;
         }
     }
 
-    private static ModelCollectionPair decodeUri(Uri uri) {
+    public static ModelCollectionPair decodeUri(Uri uri) {
         final int code = sUriMatcher.match(uri);
         if (-1 == code)
             throw new IllegalArgumentException("Unknown URI " + uri);
 
         final Model model = Model.getModel(code / Model.MAX_COLLECTIONS);
-        ModelCollectionPair pair = new ModelCollectionPair(model,  model.getCollection(code % Model.MAX_COLLECTIONS));
+        ModelCollectionPair pair = new ModelCollectionPair(model, model.getCollection(code % Model.MAX_COLLECTIONS));
         return pair;
     }
 
@@ -263,7 +281,19 @@ public class DsContentProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        // Trigger downloading ...
+        Intent intent = new Intent(getContext(), DsSyncService.class);
+        /* TODO:
+        (1) Column_name (selection) to query_term conversion ... selectionArgs will be used directly?
+        (2) Pass model index and collection index to sync service
+        (3) Sync service use model index and collection index
+         */
+/*
+        intent.putExtra(DsSyncService.KEY_QUERY_ARGUMENTS, );
+        intent.putExtra(DsSyncService.KEY_URI)
+        sectionsIntent.putExtra(Service.KEY_COLLECTION_ID, NewsApp.sModel.getIdForCollection(Collections.NAME_LINEUPS));
+        getContext().startService(sectionsIntent);
+*/
+
         ModelCollectionPair pair = decodeUri(uri);
         String tableName = pair.collection.name;
 

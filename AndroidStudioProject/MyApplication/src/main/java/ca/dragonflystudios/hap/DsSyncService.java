@@ -24,28 +24,25 @@ public class DsSyncService extends IntentService {
         super("Sync Service");
     }
 
-    public static final String KEY_URL = "ds_url";
     public static final String KEY_URI = "ds_uri";
-    public static final String KEY_CONTENTS_PATH = "ds_contents_path";
-    public static final String KEY_KEY_STRINGS = "ds_key_strings";
-    public static final String KEY_VALUE_PATH_KEYS = "ds_value_path_keys";
+    public static final String KEY_QUERY_ARGUMENTS = "ds_query_args";
 
     @Override
     protected void onHandleIntent(Intent intent) {
         final Bundle extras = intent.getExtras();
         final ContentResolver cr = getContentResolver();
 
-        final String url = extras.getString(KEY_URL);
         final Uri uri = Uri.parse(extras.getString(KEY_URI));
-        final JsonPath contentsPath = new JsonPath(extras.getStringArray(KEY_CONTENTS_PATH));
-        final String[] keyStrings = extras.getStringArray(KEY_KEY_STRINGS);
+        final DsContentProvider.ModelCollectionPair mcp = DsContentProvider.decodeUri(uri);
 
-        final String[] valuePathKeys = extras.getStringArray(KEY_VALUE_PATH_KEYS);
-        final JsonPath[] valuePaths = new JsonPath[valuePathKeys.length];
-        for (int i = 0; i < valuePaths.length; i++)
-            valuePaths[i] = new JsonPath(extras.getStringArray(valuePathKeys[i]));
+        final String[] queryArgs = extras.getStringArray(KEY_QUERY_ARGUMENTS);
+        final String queryUrl = String.format(mcp.collection.url, queryArgs);
 
-        final ContentValues[] contents = getContentsFromUrl(url, uri, contentsPath, keyStrings, valuePaths);
+        final JsonPath contentsPath = mcp.collection.contentsPath;
+        final String[] keyStrings = mcp.collection.columnNames;
+        final JsonPath[] valuePaths = mcp.collection.valuePaths;
+
+        final ContentValues[] contents = getContentsFromUrl(queryUrl, uri, contentsPath, keyStrings, valuePaths);
         cr.bulkInsert(uri, contents);
         return;
     }
