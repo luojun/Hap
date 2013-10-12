@@ -21,11 +21,15 @@ public class DsContentProvider extends ContentProvider {
 
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
+    private static final Object sLock = new Object();
+
     public static class Model {
         public static ArrayList<Model> sModels = new ArrayList<Model>();
 
         public static Model getModel(int index) {
-            return sModels.get(index);
+            synchronized(sLock) {
+                return sModels.get(index);
+            }
         }
 
         public static final int MAX_COLLECTIONS = 1024;
@@ -57,13 +61,13 @@ public class DsContentProvider extends ContentProvider {
         public ArrayList<Collection> collections;
         public SQLiteDatabase database;
 
-        public void addCollection(Collection collection) {
+        synchronized public void addCollection(Collection collection) {
             int index = getNextCollectionIndex();
             collection.setModel(this, index);
             collections.add(index, collection);
         }
 
-        public Collection getCollection(int index) {
+        synchronized public Collection getCollection(int index) {
             return collections.get(index);
         }
 
@@ -75,7 +79,10 @@ public class DsContentProvider extends ContentProvider {
             this.version = version;
             for (Collection collection : collections)
                 addCollection(collection);
-            sModels.add(mModelIndex, this);
+
+            synchronized (sLock) {
+                sModels.add(mModelIndex, this);
+            }
         }
 
         public boolean initializeDb(Context context) {
@@ -141,6 +148,13 @@ public class DsContentProvider extends ContentProvider {
             return Uri.parse("content://" + getModel().authority + "/" + name);
         }
 
+        /* TODO: more sensible implementation of mapping selection to columnName and selectionArgs to query terms
+         */
+        // The default implementation ignores selection and selectionArgs
+        public String getUrl(String selection, String[] selectionArgs) {
+            return url;
+        }
+
         protected void setModel(Model model, int index) {
             mModel = model;
             mIndex = index;
@@ -181,7 +195,13 @@ public class DsContentProvider extends ContentProvider {
 
     private static Collection NprNewsItems = new Collection("news_items", new String[]{"_id", "title", "teaser", "date" },
                 "http://api.npr.org/query?id=%s&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("list", "story"),
-                new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("pubDate", "$text")});
+                new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("pubDate", "$text")}) {
+        public String getUrl(String selection, String selectionArgs) {
+            if (!selection.equals("_id"))
+                throw new IllegalArgumentException("selection must be '_id'");
+            return String.format(url, selectionArgs);
+        }
+    };
 
     private static Model NprModel = new Model("NPR News", "api.npr.org", 1, new Collection[] { NprLineups, NprNewsItems });
 
@@ -281,22 +301,17 @@ public class DsContentProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        Intent intent = new Intent(getContext(), DsSyncService.class);
-        /* TODO:
-        (1) Column_name (selection) to query_term conversion ... selectionArgs will be used directly?
-        (2) Pass model index and collection index to sync service
-        (3) Sync service use model index and collection index
-         */
-/*
-        intent.putExtra(DsSyncService.KEY_QUERY_ARGUMENTS, );
-        intent.putExtra(DsSyncService.KEY_URI)
-        sectionsIntent.putExtra(Service.KEY_COLLECTION_ID, NewsApp.sModel.getIdForCollection(Collections.NAME_LINEUPS));
-        getContext().startService(sectionsIntent);
-*/
+        final ModelCollectionPair pair = decodeUri(uri);
+        final int modelIndex = pair.model.getIndex();
+        final int collectionIndex = pair.collection.getIndex();
 
-        ModelCollectionPair pair = decodeUri(uri);
+        final Intent intent = new Intent(getContext(), DsSyncService.class);
+        intent.putExtra(DsSyncService.KEY_MODEL_INDEX, modelIndex);
+        intent.putExtra(DsSyncService.KEY_COLLECTION_INDEX, collectionIndex);
+
+        getContext().startService(intent);
+
         String tableName = pair.collection.name;
-
         SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
         qBuilder.setTables(tableName);
 
