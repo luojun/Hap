@@ -48,6 +48,7 @@ public class GyroGestureRecognizer implements Observer {
     public void update(Observable observable, Object data) {
         final float[] values = ((AcceGyro) observable).getAngularSpeed();
 
+        // TODO: use timer to delay returning?
         switch (mState) {
             case IDLE:
                 float maxAbs = 0f;
