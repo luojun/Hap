@@ -208,20 +208,9 @@ public class DsContentProvider extends ContentProvider {
     }
 
     private static Collection NprPrograms = new Collection("programs", new String[]{"_id", "title", "description"},
-                "http://api.npr.org/list?id=3002&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("item"),
+                "http://api.npr.org/list?id=3004&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("item"),
                 new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new  DsSyncService.JsonPath("additionalInfo", "$text")});
 
-    /*
-    id = 2  : All things considered
-         13 : Fresh air
-         60 : Here and now
-         3  : Morning edition
-         61 : Science friday
-         46 : Tell me more
-         35 : Wait wait ... don't tell me
-         7  : Weekend edition saturday
-         10 : Weekend edition sunday
-     */
     private static Collection NprProgramItems = new Collection("program_items", new String[]{"_id", "title", "teaser", "date" },
                 "http://api.npr.org/query?id=%s&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("list", "story"),
                 new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("pubDate", "$text")}) {

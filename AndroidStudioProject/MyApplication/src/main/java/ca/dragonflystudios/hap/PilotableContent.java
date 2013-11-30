@@ -33,6 +33,8 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
     // (3) use CursorLoaders to update these cursors
     // (4) automatically refresh content at a given level and part upon onLoadingFinish ...
     // (5) make it so that the app plays at least OK with loader reset etc.
+    // ( ) apply program id argument
+    // ( ) navigation hooks with cursor position change
     private final String[] mLineups = {"Afghanistan", "All things considered", "America", "Arts", "Automobile"};
     private final String[] mAfghanistanMeta = {
             "Story 1 in Afghanistan begins as follows.",
