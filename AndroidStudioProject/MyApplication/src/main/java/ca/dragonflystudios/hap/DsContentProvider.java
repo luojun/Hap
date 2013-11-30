@@ -32,6 +32,16 @@ public class DsContentProvider extends ContentProvider {
             }
         }
 
+        public static Model getModelByAuthority(String authority) {
+            synchronized(sLock) {
+                for (Model model : sModels) {
+                    if (model.authority.equalsIgnoreCase(authority))
+                        return model;
+                }
+            }
+            return null;
+        }
+
         public static final int MAX_COLLECTIONS = 1024;
 
         private static final AtomicInteger sNextModelIndex = new AtomicInteger(0);
@@ -69,6 +79,14 @@ public class DsContentProvider extends ContentProvider {
 
         synchronized public Collection getCollection(int index) {
             return collections.get(index);
+        }
+
+        synchronized public Collection getCollectionByName(String name) {
+            for (Collection collection : collections) {
+                if (collection.name.equals(name))
+                    return collection;
+            }
+            return null;
         }
 
         public Model(String name, String authority, int version, Collection[] collections) {
@@ -189,11 +207,22 @@ public class DsContentProvider extends ContentProvider {
         }
     }
 
-    private static Collection NprLineups = new Collection("lineup", new String[]{"_id", "title", "description"},
+    private static Collection NprPrograms = new Collection("programs", new String[]{"_id", "title", "description"},
                 "http://api.npr.org/list?id=3002&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("item"),
                 new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new  DsSyncService.JsonPath("additionalInfo", "$text")});
 
-    private static Collection NprNewsItems = new Collection("news_items", new String[]{"_id", "title", "teaser", "date" },
+    /*
+    id = 2  : All things considered
+         13 : Fresh air
+         60 : Here and now
+         3  : Morning edition
+         61 : Science friday
+         46 : Tell me more
+         35 : Wait wait ... don't tell me
+         7  : Weekend edition saturday
+         10 : Weekend edition sunday
+     */
+    private static Collection NprProgramItems = new Collection("program_items", new String[]{"_id", "title", "teaser", "date" },
                 "http://api.npr.org/query?id=%s&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("list", "story"),
                 new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("pubDate", "$text")}) {
         public String getUrl(String selection, String selectionArgs) {
@@ -203,7 +232,7 @@ public class DsContentProvider extends ContentProvider {
         }
     };
 
-    private static Model NprModel = new Model("NPR News", "api.npr.org", 1, new Collection[] { NprLineups, NprNewsItems });
+    private static Model NprModel = new Model("NPR News", "api.npr.org", 1, new Collection[] {NprPrograms, NprProgramItems});
 
     public static class ModelCollectionPair {
         public DsContentProvider.Model model;

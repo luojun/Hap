@@ -1,6 +1,31 @@
 package ca.dragonflystudios.hap;
 
-public class PilotableContent implements Pilotable {
+import android.app.LoaderManager;
+import android.content.Context;
+import android.content.CursorLoader;
+import android.content.Loader;
+import android.database.Cursor;
+import android.os.Bundle;
+
+public class PilotableContent implements Pilotable, LoaderManager.LoaderCallbacks<Cursor> {
+
+    private final static String NPR_AUTHORITY = "api.npr.org";
+    private final static String COLLECTION_NAME_PROGRAMS = "programs";
+    private final static String COLLECTION_NAME_PROGRAM_ITEMS = "program_items";
+    private final static int PROGRAMS_LOADER_ID = 1;
+    private final static int PROGRAM_ITEMS_LOADER_ID = 2;
+
+    public PilotableContent(Context context, LoaderManager loaderManager) {
+        mContext = context;
+        mLoaderManager = loaderManager;
+        mLoaderManager.initLoader(PROGRAMS_LOADER_ID, null, this);
+    }
+
+    private Context mContext;
+    private LoaderManager mLoaderManager;
+
+    private Cursor mProgramsCursor;
+    private Cursor mCurrentProgramCursor;
 
     // TODO:
     // (1) maintain a cursor for lineups
@@ -71,6 +96,48 @@ public class PilotableContent implements Pilotable {
         mCurrentItemIndex = 0;
     }
 
+    @Override
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+        switch(i) {
+            case PROGRAMS_LOADER_ID:
+                DsContentProvider.Collection collection = DsContentProvider.Model.getModelByAuthority("api.npr.org").getCollectionByName("programs");
+                return new CursorLoader(mContext, collection.getUri(), collection.columnNames, null, null, null);
+            case PROGRAM_ITEMS_LOADER_ID:
+                collection = DsContentProvider.Model.getModelByAuthority("api.npr.org").getCollectionByName("program_items");
+                return new CursorLoader(mContext, collection.getUri(), collection.columnNames, null, null, null);
+            default:
+                throw new RuntimeException("Invalid loader id: " + i);
+        }
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+        switch (cursorLoader.getId()) {
+            case PROGRAMS_LOADER_ID:
+                mProgramsCursor = cursor;
+                return;
+            case PROGRAM_ITEMS_LOADER_ID:
+                mCurrentProgramCursor = cursor;
+                return;
+            default:
+                throw new RuntimeException("Invalid loader id: " + cursorLoader.getId());
+        }
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+        switch (cursorLoader.getId()) {
+            case PROGRAMS_LOADER_ID:
+                mProgramsCursor = null;
+                return;
+            case PROGRAM_ITEMS_LOADER_ID:
+                mCurrentProgramCursor = null;
+                return;
+            default:
+                throw new RuntimeException("Invalid loader id: " + cursorLoader.getId());
+        }
+    }
+
     private enum Level {
         CATEGORY_LIST, ITEM_LIST, ITEM
     }
@@ -126,6 +193,7 @@ public class PilotableContent implements Pilotable {
             case CATEGORY_LIST:
                 mCurrentItemIndex = 0;
                 mCurrentLevel = Level.ITEM_LIST;
+                mLoaderManager.restartLoader(PROGRAM_ITEMS_LOADER_ID, null, this);
                 return true;
             case ITEM_LIST:
                 mCurrentLevel = Level.ITEM;
