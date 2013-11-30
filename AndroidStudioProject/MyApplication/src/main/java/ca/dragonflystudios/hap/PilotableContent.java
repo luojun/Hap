@@ -56,9 +56,13 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
         switch (cursorLoader.getId()) {
             case PROGRAMS_LOADER_ID:
                 mProgramsCursor = cursor;
+                if (null != mProgramsCursor && mProgramsCursor.getCount() > 0)
+                    mProgramsCursor.moveToFirst();
                 return;
             case PROGRAM_ITEMS_LOADER_ID:
                 mCurrentProgramCursor = cursor;
+                if (null != mCurrentProgramCursor && mCurrentProgramCursor.getCount() > 0)
+                    mCurrentProgramCursor.moveToFirst();
                 return;
             default:
                 throw new RuntimeException("Invalid loader id: " + cursorLoader.getId());
@@ -89,11 +93,20 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
     public Object getContent() {
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
-                return mProgramsCursor.getString(mProgramsCursor.getColumnIndex("title")) + ". " + mProgramsCursor.getString(mProgramsCursor.getColumnIndex("description"));
+                if (null != mProgramsCursor && mProgramsCursor.getCount() > 0)
+                    return mProgramsCursor.getString(mProgramsCursor.getColumnIndex("title")) + ". " + mProgramsCursor.getString(mProgramsCursor.getColumnIndex("description"));
+                else
+                    return null;
             case ITEM_LIST:
-                return mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex("title"));
+                if (null != mCurrentProgramCursor && mCurrentProgramCursor.getCount() > 0)
+                    return mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex("title"));
+                else
+                    return null;
             case ITEM:
-                return mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex("teaser"));
+                if (null != mCurrentProgramCursor && mCurrentProgramCursor.getCount() > 0)
+                    return mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex("teaser"));
+                else
+                    return null;
         }
         return null;
     }
@@ -102,9 +115,15 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
     public String getContentDescription() {
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
-                return "Programs. The current program is " + mProgramsCursor.getString(mProgramsCursor.getColumnIndex("title")) + ".";
+                if (null != mProgramsCursor && mProgramsCursor.getCount() > 0)
+                    return "Programs. The current program is " + mProgramsCursor.getString(mProgramsCursor.getColumnIndex("title")) + ".";
+                else
+                    return null;
             case ITEM_LIST:
-                return "Stories in " + mProgramsCursor.getString(mProgramsCursor.getColumnIndex("title")) + ". Current story: " + mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex("title")) + ".";
+                if (null != mProgramsCursor && mProgramsCursor.getCount() > 0 && null != mCurrentProgramCursor && mCurrentProgramCursor.getCount() > 0)
+                    return "Stories in " + mProgramsCursor.getString(mProgramsCursor.getColumnIndex("title")) + ". Current story: " + mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex("title")) + ".";
+                else
+                    return null;
             case ITEM:
                 return "Story.";
         }
@@ -131,9 +150,13 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
                 mCurrentLevel = Level.ITEM_LIST;
-                mCurrentProgramCursor = null;
-                mLoaderManager.restartLoader(PROGRAM_ITEMS_LOADER_ID, null, this);
-                return true;
+                if (null != mProgramsCursor && mProgramsCursor.getCount() > 0) {
+                    mCurrentProgramCursor = null;
+                    mLoaderManager.restartLoader(PROGRAM_ITEMS_LOADER_ID, null, this);
+                    return true;
+                } else {
+                    return false;
+                }
             case ITEM_LIST:
                 if (null == mCurrentProgramCursor)
                     return false;

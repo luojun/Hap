@@ -48,6 +48,7 @@ public class DsSyncService extends IntentService {
         final JsonPath[] valuePaths = collection.valuePaths;
 
         final ContentValues[] contents = getContentsFromUrl(url, uri, contentsPath, keyStrings, valuePaths);
+        cr.delete(uri, selection, selectionArgs);
         cr.bulkInsert(uri, contents);
 
         return;
@@ -64,12 +65,12 @@ public class DsSyncService extends IntentService {
                 continue;
 
             ContentValues row = new ContentValues();
-
             for (int j = 0; j < keyStrings.length; j++) {
-                JsonNode valueNode = JsonPath.nodeAtPath(contentsNode, valuePaths[i]);
+                JsonNode valueNode = JsonPath.nodeAtPath(contentNode, valuePaths[j]);
                 // TODO handle data types other than String
                 row.put(keyStrings[j], valueNode.asText());
             }
+            contents[i] = row;
         }
         return contents;
     }

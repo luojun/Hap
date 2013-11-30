@@ -95,6 +95,7 @@ public class DsContentProvider extends ContentProvider {
             this.name = name;
             this.authority = authority;
             this.version = version;
+            this.collections = new ArrayList<Collection>();
             for (Collection collection : collections)
                 addCollection(collection);
 
@@ -207,11 +208,11 @@ public class DsContentProvider extends ContentProvider {
         }
     }
 
-    private static Collection NprPrograms = new Collection("programs", new String[]{"_id", "title", "description"},
+    private static Collection NprPrograms = new Collection("programs", new String[]{"program_id", "title", "description"},
                 "http://api.npr.org/list?id=3004&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("item"),
                 new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new  DsSyncService.JsonPath("additionalInfo", "$text")});
 
-    private static Collection NprProgramItems = new Collection("program_items", new String[]{"_id", "program_id", "title", "teaser", "date" },
+    private static Collection NprProgramItems = new Collection("program_items", new String[]{"story_id", "program_id", "title", "teaser", "date" },
                 "http://api.npr.org/query?id=%s&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("list", "story"),
                 new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("show", "program", "id"), new DsSyncService.JsonPath("title", "$text"), new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("pubDate", "$text")}) {
         public String getUrl(String selection, String selectionArgs) {
