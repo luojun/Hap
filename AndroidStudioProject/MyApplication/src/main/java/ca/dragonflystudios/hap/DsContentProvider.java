@@ -211,12 +211,12 @@ public class DsContentProvider extends ContentProvider {
                 "http://api.npr.org/list?id=3004&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("item"),
                 new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new  DsSyncService.JsonPath("additionalInfo", "$text")});
 
-    private static Collection NprProgramItems = new Collection("program_items", new String[]{"_id", "title", "teaser", "date" },
+    private static Collection NprProgramItems = new Collection("program_items", new String[]{"_id", "program_id", "title", "teaser", "date" },
                 "http://api.npr.org/query?id=%s&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("list", "story"),
-                new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("pubDate", "$text")}) {
+                new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("show", "program", "id"), new DsSyncService.JsonPath("title", "$text"), new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("pubDate", "$text")}) {
         public String getUrl(String selection, String selectionArgs) {
-            if (!selection.equals("_id"))
-                throw new IllegalArgumentException("selection must be '_id'");
+            if (!selection.equals("program_id"))
+                throw new IllegalArgumentException("selection must be 'program_id'");
             return String.format(url, selectionArgs);
         }
     };
@@ -326,6 +326,8 @@ public class DsContentProvider extends ContentProvider {
         final Intent intent = new Intent(getContext(), DsSyncService.class);
         intent.putExtra(DsSyncService.KEY_MODEL_INDEX, modelIndex);
         intent.putExtra(DsSyncService.KEY_COLLECTION_INDEX, collectionIndex);
+        intent.putExtra(DsSyncService.KEY_SELECTION, selection);
+        intent.putExtra(DsSyncService.KEY_SELECTION_ARGS, selectionArgs);
 
         getContext().startService(intent);
 

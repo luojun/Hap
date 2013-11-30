@@ -24,21 +24,24 @@ public class DsSyncService extends IntentService {
         super("Sync Service");
     }
 
-    public static final String KEY_URL = "ds_url";
     public static final String KEY_MODEL_INDEX = "ds_model_index";
     public static final String KEY_COLLECTION_INDEX = "ds_collection_index";
+    public static final String KEY_SELECTION = "ds_selection";
+    public static final String KEY_SELECTION_ARGS = "ds_selection_args";
 
     @Override
     protected void onHandleIntent(Intent intent) {
         final Bundle extras = intent.getExtras();
         final ContentResolver cr = getContentResolver();
 
-        final String url = extras.getString(KEY_URL);
         final int modelIndex = extras.getInt(KEY_MODEL_INDEX);
         final int collectionIndex = extras.getInt(KEY_COLLECTION_INDEX);
+        final String selection = extras.getString(KEY_SELECTION);
+        final String[] selectionArgs = extras.getStringArray(KEY_SELECTION_ARGS);
 
         final DsContentProvider.Collection collection = DsContentProvider.Model.getModel(modelIndex).getCollection(collectionIndex);
         final Uri uri = collection.getUri();
+        final String url = collection.getUrl(selection, selectionArgs);
 
         final JsonPath contentsPath = collection.contentsPath;
         final String[] keyStrings = collection.columnNames;
