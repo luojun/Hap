@@ -105,6 +105,16 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
 
     private Level mCurrentLevel;
 
+    public class Mp4 {
+        public String teaser;
+        public String url;
+
+        public Mp4(String teaser, String url) {
+            this.teaser = teaser;
+            this.url = url;
+        }
+    }
+
     @Override
     public Object getContent() {
         switch (mCurrentLevel) {
@@ -119,9 +129,9 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
                 else
                     return null;
             case ITEM:
-                if (null != mCurrentProgramCursor && mCurrentProgramCursor.getCount() > 0)
-                    return mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex("teaser"));
-                else
+                if (null != mCurrentProgramCursor && mCurrentProgramCursor.getCount() > 0) {
+                    return new Mp4(mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex("teaser")), mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex("mp4")));
+                } else
                     return null;
         }
         return null;

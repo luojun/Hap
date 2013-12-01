@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.content.LocalBroadcastManager;
@@ -24,6 +25,14 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
     private TextToSpeech mTts;
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        private void playMp4(PilotableContent.Mp4 mp4) {
+            // mTts.speak(mp4.teaser, TextToSpeech.QUEUE_FLUSH, null);
+            Uri uri = Uri.parse(mp4.url);
+            Intent i = new Intent(Intent.ACTION_VIEW);
+            i.setDataAndType(uri, "audio/mp3");
+            HapActivity.this.startActivity(i);
+        }
+
         @Override
         public void onReceive(Context context, Intent intent) {
             Log.w(getClass().getName(), "received: " + intent.getStringExtra("TYPE") + " " + intent.getStringExtra("VALUE"));
@@ -41,20 +50,33 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
                         if (content instanceof String[]) {
                             mTts.speak((String)mContent.getContentDescription() + ". Tilt left or right to choose.", TextToSpeech.QUEUE_FLUSH, null);
                             mTts.speak((String)mContent.getContent(), TextToSpeech.QUEUE_ADD, null);
-                        } else if (content instanceof String)
+                        } else if (content instanceof String) {
                             mTts.speak((String)content, TextToSpeech.QUEUE_FLUSH, null);
+                        } else if (content instanceof PilotableContent.Mp4) {
+                            playMp4((PilotableContent.Mp4) content);
+                        }
                     } else
                         mTts.speak("Sorry. Cannot go down anymore.", TextToSpeech.QUEUE_FLUSH, null);
                     break;
                 case LEFT:
                     if (mContent.previous()) {
-                        mTts.speak((String)mContent.getContent(), TextToSpeech.QUEUE_FLUSH, null);
+                        Object content = mContent.getContent();
+                        if (content instanceof String) {
+                            mTts.speak((String)content, TextToSpeech.QUEUE_FLUSH, null);
+                        } else if (content instanceof PilotableContent.Mp4) {
+                            playMp4((PilotableContent.Mp4) content);
+                        }
                     } else
                         mTts.speak("Sorry. No more before this one.", TextToSpeech.QUEUE_FLUSH, null);
                     break;
                 case RIGHT:
                     if (mContent.next()) {
-                        mTts.speak((String)mContent.getContent(), TextToSpeech.QUEUE_FLUSH, null);
+                        Object content = mContent.getContent();
+                        if (content instanceof String) {
+                            mTts.speak((String)content, TextToSpeech.QUEUE_FLUSH, null);
+                        } else if (content instanceof PilotableContent.Mp4) {
+                            playMp4((PilotableContent.Mp4) content);
+                        }
                     } else
                         mTts.speak("Sorry. No more after this one.", TextToSpeech.QUEUE_FLUSH, null);
                     break;
