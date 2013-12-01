@@ -169,8 +169,8 @@ public class DsContentProvider extends ContentProvider {
 
         /* TODO: more sensible implementation of mapping selection to columnName and selectionArgs to query terms
          */
-        // The default implementation ignores selection and selectionArgs
-        public String getUrl(String selection, String[] selectionArgs) {
+        // The default implementation ignores selectionArgs
+        public String getUrl(String[] selectionArgs) {
             return url;
         }
 
@@ -206,18 +206,26 @@ public class DsContentProvider extends ContentProvider {
         protected void dropTable(SQLiteDatabase database) {
             database.execSQL("DROP TABLE IF EXISTS " + this.name);
         }
+
+        public void requestSync(Context context, String selection, String[] selectionArgs) {
+            final Intent intent = new Intent(context, DsSyncService.class);
+            intent.putExtra(DsSyncService.KEY_MODEL_INDEX, getModel().getIndex());
+            intent.putExtra(DsSyncService.KEY_COLLECTION_INDEX, getIndex());
+            intent.putExtra(DsSyncService.KEY_SELECTION, selection);
+            intent.putExtra(DsSyncService.KEY_SELECTION_ARGS, selectionArgs);
+            context.startService(intent);
+        }
     }
 
-    private static Collection NprPrograms = new Collection("programs", new String[]{"program_id", "title", "description"},
+    private static Collection NprPrograms = new Collection("programs", new String[]{"id", "title", "description"},
                 "http://api.npr.org/list?id=3004&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("item"),
                 new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new  DsSyncService.JsonPath("additionalInfo", "$text")});
 
-    private static Collection NprProgramItems = new Collection("program_items", new String[]{"story_id", "program_id", "title", "teaser", "date" },
+    private static Collection NprProgramItems = new Collection("program_items", new String[]{"id", "program_id", "title", "teaser", "date" },
                 "http://api.npr.org/query?id=%s&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("list", "story"),
-                new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("show", "program", "id"), new DsSyncService.JsonPath("title", "$text"), new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("pubDate", "$text")}) {
-        public String getUrl(String selection, String selectionArgs) {
-            if (!selection.equals("program_id"))
-                throw new IllegalArgumentException("selection must be 'program_id'");
+                new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("show", 0, "program", "id"), new DsSyncService.JsonPath("title", "$text"), new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("pubDate", "$text")}) {
+        @Override
+        public String getUrl(String[] selectionArgs) {
             return String.format(url, selectionArgs);
         }
     };
@@ -248,7 +256,7 @@ public class DsContentProvider extends ContentProvider {
     public int delete(Uri uri, String selection, String[] selectionArgs) {
         ModelCollectionPair pair = decodeUri(uri);
         int count = pair.model.database.delete(pair.collection.name, selection, selectionArgs);
-        getContext().getContentResolver().notifyChange(uri, null);
+        // getContext().getContentResolver().notifyChange(uri, null);
         return count;
     }
 
@@ -320,17 +328,10 @@ public class DsContentProvider extends ContentProvider {
 
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        Log.w(getClass().getName(), "query is being called with uri " + uri);
         final ModelCollectionPair pair = decodeUri(uri);
         final int modelIndex = pair.model.getIndex();
         final int collectionIndex = pair.collection.getIndex();
-
-        final Intent intent = new Intent(getContext(), DsSyncService.class);
-        intent.putExtra(DsSyncService.KEY_MODEL_INDEX, modelIndex);
-        intent.putExtra(DsSyncService.KEY_COLLECTION_INDEX, collectionIndex);
-        intent.putExtra(DsSyncService.KEY_SELECTION, selection);
-        intent.putExtra(DsSyncService.KEY_SELECTION_ARGS, selectionArgs);
-
-        getContext().startService(intent);
 
         String tableName = pair.collection.name;
         SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();

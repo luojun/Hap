@@ -6,6 +6,7 @@ import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
+import android.util.Log;
 
 public class PilotableContent implements Pilotable, LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -28,11 +29,20 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
     private Cursor mProgramsCursor;
     private Cursor mCurrentProgramCursor;
 
+    private void log(String tag) {
+        Log.w(tag, "mProgramsCursor -- " + ((null == mProgramsCursor) ? "null" : "count : " + mProgramsCursor.getCount() + "; position: " + mProgramsCursor.getPosition()));
+        Log.w(tag, "mCurrentProgramCursor -- " + ((null == mCurrentProgramCursor) ? "null" : "count : " + mCurrentProgramCursor.getCount() + "; position: " + mCurrentProgramCursor.getPosition()));
+    }
+
     private boolean shiftCursor(Cursor cursor, int shift) {
+        log("before shiftCursor with shift = " + shift);
         if (null == cursor)
             return false;
 
-        return cursor.move(shift);
+        boolean ret = cursor.move(shift);
+        log("after shiftCursor with shift = " + shift);
+
+        return ret;
     }
 
 
@@ -41,11 +51,13 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
         switch(i) {
             case PROGRAMS_LOADER_ID:
                 DsContentProvider.Collection collection = DsContentProvider.Model.getModelByAuthority("api.npr.org").getCollectionByName("programs");
+                collection.requestSync(mContext, null, null);
                 return new CursorLoader(mContext, collection.getUri(), collection.columnNames, null, null, null);
             case PROGRAM_ITEMS_LOADER_ID:
-                String program_id = mProgramsCursor.getString(mProgramsCursor.getColumnIndex("program_id"));
+                String program_id = mProgramsCursor.getString(mProgramsCursor.getColumnIndex("id"));
                 collection = DsContentProvider.Model.getModelByAuthority("api.npr.org").getCollectionByName("program_items");
-                return new CursorLoader(mContext, collection.getUri(), collection.columnNames, "program_id", new String[] { program_id }, null);
+                collection.requestSync(mContext, "program_id = ?", new String[] { program_id });
+                return new CursorLoader(mContext, collection.getUri(), collection.columnNames, "program_id = " + program_id, null, null);
             default:
                 throw new RuntimeException("Invalid loader id: " + i);
         }
@@ -58,11 +70,13 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
                 mProgramsCursor = cursor;
                 if (null != mProgramsCursor && mProgramsCursor.getCount() > 0)
                     mProgramsCursor.moveToFirst();
+                log("onLoadFinished with loaderId " + cursorLoader.getId());
                 return;
             case PROGRAM_ITEMS_LOADER_ID:
                 mCurrentProgramCursor = cursor;
                 if (null != mCurrentProgramCursor && mCurrentProgramCursor.getCount() > 0)
                     mCurrentProgramCursor.moveToFirst();
+                log("onLoadFinished with loaderId " + cursorLoader.getId());
                 return;
             default:
                 throw new RuntimeException("Invalid loader id: " + cursorLoader.getId());
@@ -74,9 +88,11 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
         switch (cursorLoader.getId()) {
             case PROGRAMS_LOADER_ID:
                 mProgramsCursor = null;
+                log("onLoaderReset with loaderId " + cursorLoader.getId());
                 return;
             case PROGRAM_ITEMS_LOADER_ID:
                 mCurrentProgramCursor = null;
+                log("onLoaderReset with loaderId " + cursorLoader.getId());
                 return;
             default:
                 throw new RuntimeException("Invalid loader id: " + cursorLoader.getId());

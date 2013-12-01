@@ -41,7 +41,7 @@ public class DsSyncService extends IntentService {
 
         final DsContentProvider.Collection collection = DsContentProvider.Model.getModel(modelIndex).getCollection(collectionIndex);
         final Uri uri = collection.getUri();
-        final String url = collection.getUrl(selection, selectionArgs);
+        final String url = collection.getUrl(selectionArgs);
 
         final JsonPath contentsPath = collection.contentsPath;
         final String[] keyStrings = collection.columnNames;
