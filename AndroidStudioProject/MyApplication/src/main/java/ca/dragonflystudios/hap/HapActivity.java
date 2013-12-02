@@ -24,6 +24,9 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
     private PilotableContent mContent;
     private TextToSpeech mTts;
 
+    // TODO: refactor the following and PilotableContent in terms of MEC -- Model Endu Controller
+    // Endu <=> View; Windah <=> Window (ah is beginning of German Ahre; Endu is part of French entendu, like how "view" originated from French "seen".
+
     private BroadcastReceiver mReceiver = new BroadcastReceiver() {
         private void playMp4(PilotableContent.Mp4 mp4) {
             // mTts.speak(mp4.teaser, TextToSpeech.QUEUE_FLUSH, null);
