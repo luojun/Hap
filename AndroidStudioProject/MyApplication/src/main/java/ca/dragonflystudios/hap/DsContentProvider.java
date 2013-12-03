@@ -207,12 +207,13 @@ public class DsContentProvider extends ContentProvider {
             database.execSQL("DROP TABLE IF EXISTS " + this.name);
         }
 
-        public void requestSync(Context context, String selection, String[] selectionArgs) {
+        public void requestSync(Context context, String selection, String[] selectionArgs, String sortOrder) {
             final Intent intent = new Intent(context, DsSyncService.class);
             intent.putExtra(DsSyncService.KEY_MODEL_INDEX, getModel().getIndex());
             intent.putExtra(DsSyncService.KEY_COLLECTION_INDEX, getIndex());
             intent.putExtra(DsSyncService.KEY_SELECTION, selection);
             intent.putExtra(DsSyncService.KEY_SELECTION_ARGS, selectionArgs);
+            intent.putExtra(DsSyncService.KEY_SORT_ORDER, sortOrder);
             context.startService(intent);
         }
     }

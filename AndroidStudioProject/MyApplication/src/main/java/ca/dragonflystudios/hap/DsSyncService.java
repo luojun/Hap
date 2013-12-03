@@ -28,6 +28,7 @@ public class DsSyncService extends IntentService {
     public static final String KEY_COLLECTION_INDEX = "ds_collection_index";
     public static final String KEY_SELECTION = "ds_selection";
     public static final String KEY_SELECTION_ARGS = "ds_selection_args";
+    public static final String KEY_SORT_ORDER = "ds_sort_order";
 
     @Override
     protected void onHandleIntent(Intent intent) {

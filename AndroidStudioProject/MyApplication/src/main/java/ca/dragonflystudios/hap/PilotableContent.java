@@ -51,12 +51,12 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
         switch(i) {
             case PROGRAMS_LOADER_ID:
                 DsContentProvider.Collection collection = DsContentProvider.Model.getModelByAuthority("api.npr.org").getCollectionByName("programs");
-                collection.requestSync(mContext, null, null);
+                collection.requestSync(mContext, null, null, null);
                 return new CursorLoader(mContext, collection.getUri(), collection.columnNames, null, null, null);
             case PROGRAM_ITEMS_LOADER_ID:
                 String program_id = mProgramsCursor.getString(mProgramsCursor.getColumnIndex("id"));
                 collection = DsContentProvider.Model.getModelByAuthority("api.npr.org").getCollectionByName("program_items");
-                collection.requestSync(mContext, "program_id = ?", new String[] { program_id });
+                collection.requestSync(mContext, "program_id = ?", new String[] { program_id }, null);
                 return new CursorLoader(mContext, collection.getUri(), collection.columnNames, "program_id = " + program_id, null, null);
             default:
                 throw new RuntimeException("Invalid loader id: " + i);
