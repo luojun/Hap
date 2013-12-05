@@ -21,7 +21,7 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
     private AcceGyro mAcceGyro;
     private GyroGestureRecognizer mRecognizer;
 
-    private PilotableContent mContent;
+    private NprNavigator mContent;
     private TextToSpeech mTts;
 
     // TODO: refactor the following and PilotableContent in terms of MEC -- Model Endu Controller
@@ -95,7 +95,7 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        mContent = new PilotableContent(this, getLoaderManager());
+        mContent = new NprNavigator(this, getLoaderManager());
         mTts = new TextToSpeech(this, this);
         mGraphView = new AcceGyroGraphView(this);
         mAcceGyro = new AcceGyro((SensorManager) getSystemService(SENSOR_SERVICE));

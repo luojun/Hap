@@ -2,12 +2,9 @@ package ca.dragonflystudios.binder;
 
 import android.app.LoaderManager;
 import android.content.Context;
-import android.content.CursorLoader;
 import android.content.Loader;
 import android.database.Cursor;
-import android.os.Bundle;
 
-import ca.dragonflystudios.endu.Endu;
 import ca.dragonflystudios.endu.ListEndu;
 import ca.dragonflystudios.hap.DsContentProvider;
 
@@ -22,57 +19,25 @@ import ca.dragonflystudios.hap.DsContentProvider;
 // TODO: refactor the Endu stuff into something like a "Presenter" interface.
 // TODO: refactor the Collection stuff into something like a "Content"/"Model" interface.
 
-public class ListBinder implements LoaderManager.LoaderCallbacks<Cursor>{
-
-    private static int sLoaderId = 1024;
-    private static Object sLock = new Object();
-    private static int getNextLoaderId() {
-        synchronized(sLock) {
-            return ++sLoaderId;
-        }
-    }
-
-    final int mLoaderId;
-
-    LoaderManager mLoaderManager;
-    Context mContext;
-    DsContentProvider.Collection mCollection;
-    String mSelection;
-    String[] mSelectionArgs;
-    String mSortOrder;
+public class ListBinder extends EnduBinder implements LoaderManager.LoaderCallbacks<Cursor> {
     ListEndu mListEndu;
 
     public ListBinder(LoaderManager loaderManager, Context context, ListEndu listEndu, DsContentProvider.Collection collection, String selection, String[] selectionArgs, String sortOrder) {
-        mLoaderManager = loaderManager;
-        mContext = context;
+        super(loaderManager, context, listEndu, collection, selection, selectionArgs, sortOrder);
         mListEndu = listEndu;
-        mCollection = collection;
-        mSelection = selection;
-        mSelectionArgs = selectionArgs;
-        mSortOrder = sortOrder;
-
-        mLoaderId = getNextLoaderId();
-        mLoaderManager.initLoader(mLoaderId, null, this);
-    }
-
-    @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        mCollection.requestSync(mContext, mSelection, mSelectionArgs, mSortOrder);
-        return new CursorLoader(mContext, mCollection.getUri(), mCollection.columnNames, mSelection, mSelectionArgs, mSortOrder);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
-        if (mLoaderId == cursorLoader.getId()) {
-            mListEndu.updateCursor(cursor);
+        if (getLoaderId() == cursorLoader.getId()) {
+            mListEndu.updateListCursor(cursor);
         }
     }
 
     @Override
     public void onLoaderReset(Loader<Cursor> cursorLoader) {
-        if (mLoaderId == cursorLoader.getId()) {
-            mListEndu.updateCursor(null);
+        if (getLoaderId() == cursorLoader.getId()) {
+            mListEndu.updateListCursor(null);
         }
     }
-
 }

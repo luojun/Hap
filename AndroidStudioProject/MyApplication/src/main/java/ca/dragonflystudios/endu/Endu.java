@@ -2,6 +2,9 @@ package ca.dragonflystudios.endu;
 
 import android.database.Cursor;
 
+import ca.dragonflystudios.Player.ContentPlayer;
+import ca.dragonflystudios.hap.Pilotable;
+
 /**
  * Created by Jun Luo on 13-12-02.
  *
@@ -13,14 +16,73 @@ import android.database.Cursor;
  * of the word Ahre, for "ear". Etymologically, "Window" means "wind-eye".
  */
 
-public class Endu {
+// TODO: Tap into the onDraw callbacks of view for framed refreshing? TAI!
 
-    public void onPlay() {
+public class Endu implements Pilotable {
 
+    private Cursor mCursor;
+    private int mPosition;
+
+    private ContentPlayer mContentPlayer;
+
+    public Endu(ContentPlayer player) {
+        mContentPlayer = player;
     }
 
-    public void replay() {
-
+    public Endu(ContentPlayer player, Cursor cursor, int position) {
+        mContentPlayer = player;
+        mCursor = cursor;
+        mPosition = position;
     }
 
+    public boolean onPlay() {
+        if (null == mCursor && 0 <= mPosition && mPosition < mCursor.getCount())
+            return false;
+
+        int savedPosition = mCursor.getPosition();
+        if (savedPosition != mPosition)
+            mCursor.moveToPosition(mPosition);
+
+        mContentPlayer.playContent(mCursor);
+
+        if (savedPosition != mPosition)
+            mCursor.moveToPosition(savedPosition);
+
+        return true;
+    }
+
+    public void updateCursor(Cursor cursor, int position) {
+        mCursor = cursor;
+        mPosition = position;
+    }
+
+    @Override
+    public boolean up() {
+        return false;
+    }
+
+    @Override
+    public boolean down() {
+        return onPlay();
+    }
+
+    @Override
+    public boolean next() {
+        return false;
+    }
+
+    @Override
+    public boolean previous() {
+        return false;
+    }
+
+    @Override
+    public Object getContent() {
+        return null;
+    }
+
+    @Override
+    public String getContentDescription() {
+        return null;
+    }
 }
