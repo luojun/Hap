@@ -223,9 +223,9 @@ public class DsContentProvider extends ContentProvider {
                 new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new  DsSyncService.JsonPath("additionalInfo", "$text")});
 
     private static Collection NprProgramItems = new Collection("program_items", new String[]{"id", "program_id", "title", "teaser", "date", "mp4" },
-                "http://api.npr.org/query?id=%s&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("list", "story"),
+                "http://api.npr.org/query?id=%s&fields=title,teaser,storyDate,audio&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("list", "story"),
                 new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("show", 0, "program", "id"), new DsSyncService.JsonPath("title", "$text"),
-                    new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("pubDate", "$text"), new DsSyncService.JsonPath("audio", 0, "format", "mp4", "$text")}) {
+                    new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("storyDate", "$text"), new DsSyncService.JsonPath("audio", 0, "format", "mp4", "$text")}) {
         @Override
         public String getUrl(String[] selectionArgs) {
             return String.format(url, selectionArgs);
