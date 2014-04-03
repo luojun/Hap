@@ -6,7 +6,7 @@
 
     <uses-sdk
         android:minSdkVersion="11"
-        android:targetSdkVersion="18" />
+        android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -34,7 +34,7 @@
         <provider
             android:name="ca.dragonflystudios.hap.DsContentProvider"
             android:authorities="api.npr.org"
-            android:exported="false"></provider>
+            android:exported="false" />
 
         <service android:name="ca.dragonflystudios.hap.DsSyncService" />
     </application>
