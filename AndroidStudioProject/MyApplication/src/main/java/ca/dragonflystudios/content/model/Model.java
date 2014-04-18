@@ -1,12 +1,7 @@
 package ca.dragonflystudios.content.model;
 
-import android.content.Context;
-import android.database.sqlite.SQLiteDatabase;
-
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import ca.dragonflystudios.content.db.DbHelper;
 
 /**
  * Created by jun on 2014-04-18.
@@ -60,7 +55,6 @@ public class Model {
     public String authority;
     public int version;
     public ArrayList<Collection> collections;
-    public SQLiteDatabase database;
 
     synchronized public void addCollection(Collection collection) {
         int index = getNextCollectionIndex();
@@ -93,11 +87,5 @@ public class Model {
         synchronized (sLock) {
             sModels.add(mModelIndex, this);
         }
-    }
-
-    public boolean initializeDb(Context context) {
-        DbHelper helper = new DbHelper(context, this);
-        database = helper.getWritableDatabase();
-        return (null != database);
     }
 }

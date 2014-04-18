@@ -1,4 +1,4 @@
-package ca.dragonflystudios.content.json;
+package ca.dragonflystudios.content.service.processor.json;
 
 import android.content.ContentValues;
 
@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import ca.dragonflystudios.content.model.ContentPath;
-import ca.dragonflystudios.content.processor.ContentsExtractor;
-import ca.dragonflystudios.content.processor.StreamParser;
+import ca.dragonflystudios.content.service.processor.ContentsExtractor;
+import ca.dragonflystudios.content.service.processor.StreamParser;
 
 /**
  * Created by jun on 2014-04-18.

@@ -5,8 +5,8 @@ import android.content.ContentValues;
 import android.content.Intent;
 import android.os.Bundle;
 
-import ca.dragonflystudios.content.processor.ContentsExtractor;
-import ca.dragonflystudios.content.processor.StreamParser;
+import ca.dragonflystudios.content.service.processor.ContentsExtractor;
+import ca.dragonflystudios.content.service.processor.StreamParser;
 
 /**
  * Created by jun on 2014-04-18.
@@ -69,8 +69,9 @@ public class HttpService extends IntentService
         final Result result = HttpHelper.request(request, mParser);
         final ContentValues[] contents = mExtractor.extract(result.parsed, null, null, null);
 
+        // build ArrayList of ContentOperations
         // get ContentResolver ...
-        // do updates
+        // do updates: applyBatch
         // notify if Successful.
         return;
     }
