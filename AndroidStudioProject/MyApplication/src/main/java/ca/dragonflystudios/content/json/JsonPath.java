@@ -3,7 +3,7 @@ package ca.dragonflystudios.content.json;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
 
-import ca.dragonflystudios.content.ContentPath;
+import ca.dragonflystudios.content.model.ContentPath;
 
 /**
  * Created by jun on 2014-04-18.

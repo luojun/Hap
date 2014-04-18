@@ -1,12 +1,14 @@
-package ca.dragonflystudios.content;
+package ca.dragonflystudios.content.processor;
 
 import android.content.ContentValues;
+
+import ca.dragonflystudios.content.model.ContentPath;
 
 /**
  * Created by jun on 2014-04-18.
  */
 
-public interface ContentsExtractor<T>
+public interface ContentsExtractor
 {
     /**
      *
@@ -18,5 +20,5 @@ public interface ContentsExtractor<T>
      * @param itemFieldNames names of the fields of an item, in one-to-one correspondence with @param itemFieldPaths
      * @return extracted content items
      */
-    public ContentValues[] extract(T base, ContentPath itemsPath, ContentPath[] itemFieldPaths, String[] itemFieldNames);
+    public ContentValues[] extract(Object base, ContentPath itemsPath, ContentPath[] itemFieldPaths, String[] itemFieldNames);
 }

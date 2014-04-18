@@ -9,15 +9,15 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.IOException;
 import java.io.InputStream;
 
-import ca.dragonflystudios.content.ContentPath;
-import ca.dragonflystudios.content.ContentsExtractor;
-import ca.dragonflystudios.content.StreamParser;
+import ca.dragonflystudios.content.model.ContentPath;
+import ca.dragonflystudios.content.processor.ContentsExtractor;
+import ca.dragonflystudios.content.processor.StreamParser;
 
 /**
  * Created by jun on 2014-04-18.
  */
 
-public class JsonProcessor implements StreamParser<JsonNode>, ContentsExtractor<JsonNode>
+public class JsonProcessor implements StreamParser, ContentsExtractor
 {
     @Override
     public JsonNode parse(InputStream stream)
@@ -34,8 +34,8 @@ public class JsonProcessor implements StreamParser<JsonNode>, ContentsExtractor<
     }
 
     @Override
-    public ContentValues[] extract(JsonNode base, ContentPath itemsPath, ContentPath[] itemFieldPaths, String[] itemFieldNames) {
-        final ArrayNode contentsNode = (ArrayNode) JsonPath.nodeAtPath(base, (JsonPath)itemsPath);
+    public ContentValues[] extract(Object base, ContentPath itemsPath, ContentPath[] itemFieldPaths, String[] itemFieldNames) {
+        final ArrayNode contentsNode = (ArrayNode) JsonPath.nodeAtPath((JsonNode)base, (JsonPath)itemsPath);
         final ContentValues[] contents = new ContentValues[contentsNode.size()];
 
         for (int i = 0; i < contentsNode.size(); i++) {
