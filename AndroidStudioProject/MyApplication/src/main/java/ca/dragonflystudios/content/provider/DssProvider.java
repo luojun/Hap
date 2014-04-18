@@ -17,12 +17,14 @@ import android.net.Uri;
 import android.util.Log;
 
 import ca.dragonflystudios.content.model.Model;
+import ca.dragonflystudios.content.service.HttpService;
 import ca.dragonflystudios.hap.DsSyncService;
 
-public class DssProvider extends ContentProvider {
-
+public class DssProvider extends ContentProvider
+{
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(Uri uri, String selection, String[] selectionArgs)
+    {
         UriManager.MCD mcd = UriManager.resolve(uri);
         int count = mcd.database.delete(mcd.collection.name, selection, selectionArgs);
         // getContext().getContentResolver().notifyChange(uri, null);
@@ -30,13 +32,15 @@ public class DssProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(Uri uri)
+    {
         UriManager.MCD mcd = UriManager.resolve(uri);
         return "vnd.android.cursor.dir/vnd." + mcd.model.authority;
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(Uri uri, ContentValues values)
+    {
         UriManager.MCD mcd = UriManager.resolve(uri);
 
         Cursor c = mcd.database.rawQuery("SELECT * FROM " + mcd.collection.name + " WHERE _id = '" + values.getAsString("_id") + "'", null);
@@ -102,7 +106,8 @@ public class DssProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder)
+    {
         final UriManager.MCD mcd = UriManager.resolve(uri);
 
         String tableName = mcd.collection.name;
@@ -117,7 +122,8 @@ public class DssProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs)
+    {
         UriManager.MCD mcd = UriManager.resolve(uri);
         int count = mcd.database.updateWithOnConflict(mcd.collection.name, values, selection, selectionArgs, SQLiteDatabase.CONFLICT_REPLACE);
         getContext().getContentResolver().notifyChange(uri, null);
@@ -128,7 +134,7 @@ public class DssProvider extends ContentProvider {
     private void requestSync(UriManager.MCD mcd, String selection, String[] selectionArgs, String sortOrder)
     {
         final Context context = getContext();
-        final Intent intent = new Intent(context, DsSyncService.class);
+        final Intent intent = new Intent(context, HttpService.class);
         intent.putExtra(DsSyncService.KEY_MODEL_INDEX, mcd.model.getIndex());
         intent.putExtra(DsSyncService.KEY_COLLECTION_INDEX, mcd.collection.getIndex());
         intent.putExtra(DsSyncService.KEY_SELECTION, selection);

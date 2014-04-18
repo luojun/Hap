@@ -8,15 +8,16 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 
-public class PilotableContent implements Pilotable, LoaderManager.LoaderCallbacks<Cursor> {
-
+public class PilotableContent implements Pilotable, LoaderManager.LoaderCallbacks<Cursor>
+{
     private final static String NPR_AUTHORITY = "api.npr.org";
     private final static String COLLECTION_NAME_PROGRAMS = "programs";
     private final static String COLLECTION_NAME_PROGRAM_ITEMS = "program_items";
     private final static int PROGRAMS_LOADER_ID = 1;
     private final static int PROGRAM_ITEMS_LOADER_ID = 2;
 
-    public PilotableContent(Context context, LoaderManager loaderManager) {
+    public PilotableContent(Context context, LoaderManager loaderManager)
+    {
         mCurrentLevel = Level.CATEGORY_LIST;
         mContext = context;
         mLoaderManager = loaderManager;
@@ -29,12 +30,14 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
     private Cursor mProgramsCursor;
     private Cursor mCurrentProgramCursor;
 
-    private void log(String tag) {
+    private void log(String tag)
+    {
         Log.w(tag, "mProgramsCursor -- " + ((null == mProgramsCursor) ? "null" : "count : " + mProgramsCursor.getCount() + "; position: " + mProgramsCursor.getPosition()));
         Log.w(tag, "mCurrentProgramCursor -- " + ((null == mCurrentProgramCursor) ? "null" : "count : " + mCurrentProgramCursor.getCount() + "; position: " + mCurrentProgramCursor.getPosition()));
     }
 
-    private boolean shiftCursor(Cursor cursor, int shift) {
+    private boolean shiftCursor(Cursor cursor, int shift)
+    {
         log("before shiftCursor with shift = " + shift);
         if (null == cursor)
             return false;
@@ -47,8 +50,9 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
 
 
     @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
-        switch(i) {
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle)
+    {
+        switch (i) {
             case PROGRAMS_LOADER_ID:
                 DsContentProvider.Collection collection = DsContentProvider.Model.getModelByAuthority("api.npr.org").getCollectionByName("programs");
                 collection.requestSync(mContext, null, null, null);
@@ -56,7 +60,7 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
             case PROGRAM_ITEMS_LOADER_ID:
                 String program_id = mProgramsCursor.getString(mProgramsCursor.getColumnIndex("id"));
                 collection = DsContentProvider.Model.getModelByAuthority("api.npr.org").getCollectionByName("program_items");
-                collection.requestSync(mContext, "program_id = ?", new String[] { program_id }, null);
+                collection.requestSync(mContext, "program_id = ?", new String[]{program_id}, null);
                 return new CursorLoader(mContext, collection.getUri(), collection.columnNames, "program_id = " + program_id, null, null);
             default:
                 throw new RuntimeException("Invalid loader id: " + i);
@@ -64,7 +68,8 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor)
+    {
         switch (cursorLoader.getId()) {
             case PROGRAMS_LOADER_ID:
                 mProgramsCursor = cursor;
@@ -84,7 +89,8 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+    public void onLoaderReset(Loader<Cursor> cursorLoader)
+    {
         switch (cursorLoader.getId()) {
             case PROGRAMS_LOADER_ID:
                 mProgramsCursor = null;
@@ -99,24 +105,28 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
         }
     }
 
-    private enum Level {
+    private enum Level
+    {
         CATEGORY_LIST, ITEM_LIST, ITEM
     }
 
     private Level mCurrentLevel;
 
-    public class Mp4 {
+    public class Mp4
+    {
         public String teaser;
         public String url;
 
-        public Mp4(String teaser, String url) {
+        public Mp4(String teaser, String url)
+        {
             this.teaser = teaser;
             this.url = url;
         }
     }
 
     @Override
-    public Object getContent() {
+    public Object getContent()
+    {
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
                 if (null != mProgramsCursor && mProgramsCursor.getCount() > 0)
@@ -138,7 +148,8 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
     }
 
     @Override
-    public String getContentDescription() {
+    public String getContentDescription()
+    {
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
                 if (null != mProgramsCursor && mProgramsCursor.getCount() > 0)
@@ -157,7 +168,8 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
     }
 
     @Override
-    public boolean up() {
+    public boolean up()
+    {
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
                 return false;
@@ -172,7 +184,8 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
     }
 
     @Override
-    public boolean down() {
+    public boolean down()
+    {
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
                 mCurrentLevel = Level.ITEM_LIST;
@@ -195,7 +208,8 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
     }
 
     @Override
-    public boolean next() {
+    public boolean next()
+    {
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
                 return shiftCursor(mProgramsCursor, 1);
@@ -208,7 +222,8 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
     }
 
     @Override
-    public boolean previous() {
+    public boolean previous()
+    {
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
                 return shiftCursor(mProgramsCursor, -1);

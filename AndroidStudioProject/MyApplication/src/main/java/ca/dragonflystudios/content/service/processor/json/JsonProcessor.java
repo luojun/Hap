@@ -34,8 +34,9 @@ public class JsonProcessor implements StreamParser, ContentsExtractor
     }
 
     @Override
-    public ContentValues[] extract(Object base, ContentPath itemsPath, ContentPath[] itemFieldPaths, String[] itemFieldNames) {
-        final ArrayNode contentsNode = (ArrayNode) JsonPath.nodeAtPath((JsonNode)base, (JsonPath)itemsPath);
+    public ContentValues[] extract(Object base, ContentPath itemsPath, ContentPath[] itemFieldPaths, String[] itemFieldNames)
+    {
+        final ArrayNode contentsNode = (ArrayNode) JsonPath.nodeAtPath((JsonNode) base, (JsonPath) itemsPath);
         final ContentValues[] contents = new ContentValues[contentsNode.size()];
 
         for (int i = 0; i < contentsNode.size(); i++) {
@@ -45,7 +46,7 @@ public class JsonProcessor implements StreamParser, ContentsExtractor
 
             ContentValues row = new ContentValues();
             for (int j = 0; j < itemFieldNames.length; j++) {
-                JsonNode valueNode = JsonPath.nodeAtPath(contentNode, (JsonPath)itemFieldPaths[j]);
+                JsonNode valueNode = JsonPath.nodeAtPath(contentNode, (JsonPath) itemFieldPaths[j]);
                 // TODO handle data types other than String
                 row.put(itemFieldNames[j], valueNode.asText());
             }

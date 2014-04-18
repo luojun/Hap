@@ -11,8 +11,8 @@ import android.view.View;
 import java.util.Observable;
 import java.util.Observer;
 
-public class AcceGyroGraphView extends View implements Observer {
-
+public class AcceGyroGraphView extends View implements Observer
+{
     private final static int BACKGROUND_COLOR = 0xFF000000;
     private final static int LINE_COLOR = 0xFFAAAAAA;
     private final static float STEP_SIZE = 3f;
@@ -30,7 +30,8 @@ public class AcceGyroGraphView extends View implements Observer {
     private float mYOffsetAngularSpeed[] = new float[3];
     private float mMaxX;
 
-    public AcceGyroGraphView(Context context) {
+    public AcceGyroGraphView(Context context)
+    {
         super(context);
         mColors[0] = Color.argb(255, 255, 0, 0);
         mColors[1] = Color.argb(255, 0, 255, 0);
@@ -39,7 +40,8 @@ public class AcceGyroGraphView extends View implements Observer {
     }
 
     @Override
-    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+    protected void onSizeChanged(int w, int h, int oldw, int oldh)
+    {
         synchronized (this) {
             mWidth = w;
             mHeight = h;
@@ -49,7 +51,8 @@ public class AcceGyroGraphView extends View implements Observer {
     }
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(Canvas canvas)
+    {
         synchronized (this) {
             if (mBitmap != null) {
                 if (mLastX >= mMaxX)
@@ -59,7 +62,8 @@ public class AcceGyroGraphView extends View implements Observer {
         }
     }
 
-    private void resetBitmap() {
+    private void resetBitmap()
+    {
         mBitmap = Bitmap.createBitmap(mWidth, mHeight, Bitmap.Config.RGB_565);
         mCanvas.setBitmap(mBitmap);
         mCanvas.drawColor(BACKGROUND_COLOR);
@@ -80,7 +84,8 @@ public class AcceGyroGraphView extends View implements Observer {
     }
 
     @Override
-    public void update(Observable observable, Object data) {
+    public void update(Observable observable, Object data)
+    {
         synchronized (this) {
             if (mBitmap != null) {
                 final float[] values = (float[]) data;

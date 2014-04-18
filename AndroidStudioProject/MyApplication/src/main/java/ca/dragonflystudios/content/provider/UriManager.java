@@ -13,8 +13,8 @@ import ca.dragonflystudios.content.model.Model;
  * Created by jun on 2014-04-18.
  */
 
-public class UriManager {
-
+public class UriManager
+{
     public static class MCD
     {
         public Model model;
@@ -43,7 +43,8 @@ public class UriManager {
         sUriMatcher.addURI(authority, collectionName, collectionId);
     }
 
-    public static MCD resolve(Uri uri) {
+    public static MCD resolve(Uri uri)
+    {
         final int code = sUriMatcher.match(uri);
         if (-1 == code)
             throw new IllegalArgumentException("Cannot find database for unknown URI: " + uri);

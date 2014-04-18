@@ -12,25 +12,28 @@ import ca.dragonflystudios.content.model.Model;
  * Created by jun on 2014-04-18.
  */
 
-public class DatabaseHelper {
-
+public class DatabaseHelper
+{
     private static class DbOpenHelper extends SQLiteOpenHelper
     {
         private Model mModel;
 
-        public DbOpenHelper(Context context, Model model) {
+        public DbOpenHelper(Context context, Model model)
+        {
             super(context, model.authority + ".db", null, model.version);
             mModel = model;
         }
 
         @Override
-        public void onCreate(SQLiteDatabase db) {
+        public void onCreate(SQLiteDatabase db)
+        {
             for (Collection collection : mModel.collections)
                 createTable(db, collection);
         }
 
         @Override
-        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
+        {
             // TODO: content model handles upgrade according to Web API versions
             for (Collection collection : mModel.collections)
                 dropTable(db, collection);
@@ -39,20 +42,24 @@ public class DatabaseHelper {
         }
     }
 
-    protected static SQLiteDatabase initializeDatabase(Context context, Model model) {
+    protected static SQLiteDatabase initializeDatabase(Context context, Model model)
+    {
         DbOpenHelper helper = new DbOpenHelper(context, model);
         return helper.getWritableDatabase();
     }
 
-    public static void createTable(SQLiteDatabase database, Collection collection) {
+    public static void createTable(SQLiteDatabase database, Collection collection)
+    {
         database.execSQL(getTableCreationString(collection));
     }
 
-    public static void dropTable(SQLiteDatabase database, Collection collection) {
+    public static void dropTable(SQLiteDatabase database, Collection collection)
+    {
         database.execSQL("DROP TABLE IF EXISTS " + collection.name);
     }
 
-    private static String getTableCreationString(Collection collection) {
+    private static String getTableCreationString(Collection collection)
+    {
         StringBuilder sb = new StringBuilder("CREATE TABLE ");
         sb.append(collection.name);
 

@@ -10,9 +10,10 @@ import ca.dragonflystudios.Player.ContentPlayer;
  * Created by Jun Luo on 13-12-02.
  */
 
-public class ListEndu extends Endu {
-
-    public ListEndu(ContentPlayer enduPlayer, ContentPlayer listItemPlayer) {
+public class ListEndu extends Endu
+{
+    public ListEndu(ContentPlayer enduPlayer, ContentPlayer listItemPlayer)
+    {
         super(enduPlayer);
         mListItemPlayer = listItemPlayer;
     }
@@ -23,7 +24,8 @@ public class ListEndu extends Endu {
     private Cursor mCursor;
     private int mCurrentItemIndex = -1;
 
-    public void updateListCursor(Cursor cursor) {
+    public void updateListCursor(Cursor cursor)
+    {
         mCursor = cursor;
 
         if (null == mCursor || mCursor.getCount() < 1) {
@@ -40,37 +42,44 @@ public class ListEndu extends Endu {
         setCurrentItem(0);
     }
 
-    public void playCurrentItem() {
+    public void playCurrentItem()
+    {
         mEndus.get(mCurrentItemIndex).onPlay();
     }
 
-    public void setCurrentItem(int index) {
+    public void setCurrentItem(int index)
+    {
         mCurrentItemIndex = index;
         mCursor.moveToPosition(index);
         playItem(index);
     }
 
-    public void playItem(int index) {
+    public void playItem(int index)
+    {
         mEndus.get(index).onPlay();
     }
 
     @Override
-    public boolean up() {
+    public boolean up()
+    {
         return false;
     }
 
     @Override
-    public boolean down() {
+    public boolean down()
+    {
         return onPlay();
     }
 
     @Override
-    public boolean next() {
+    public boolean next()
+    {
         return false;
     }
 
     @Override
-    public boolean previous() {
+    public boolean previous()
+    {
         return false;
     }
 

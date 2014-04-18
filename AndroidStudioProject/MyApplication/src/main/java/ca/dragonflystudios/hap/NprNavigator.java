@@ -12,13 +12,14 @@ import ca.dragonflystudios.endu.ListEndu;
  * Created by Jun Luo on 13-12-04.
  */
 
-public class NprNavigator implements Pilotable {
-
+public class NprNavigator implements Pilotable
+{
     // TODO: tracks history; allow going "home" etc.
 
     private final static String NPR_AUTHORITY = "api.npr.org";
 
-    private static enum Level {
+    private static enum Level
+    {
         CATEGORY_LIST, ITEM_LIST, ITEM
     }
 
@@ -32,18 +33,23 @@ public class NprNavigator implements Pilotable {
     private ListBinder mCurrentProgramBinder;
     private ListEndu mCurrentProgramEndu;
 
-    public NprNavigator(Context context, LoaderManager loaderManager) {
+    public NprNavigator(Context context, LoaderManager loaderManager)
+    {
         mCurrentLevel = Level.CATEGORY_LIST;
         mContext = context;
 
-        mProgramsEndu = new ListEndu(new ContentPlayer() {
+        mProgramsEndu = new ListEndu(new ContentPlayer()
+        {
             @Override
-            public void playContent(Cursor cursor) {
+            public void playContent(Cursor cursor)
+            {
                 // play NPR overview
             }
-        }, new ContentPlayer() {
+        }, new ContentPlayer()
+        {
             @Override
-            public void playContent(Cursor cursor) {
+            public void playContent(Cursor cursor)
+            {
                 // play program overview
             }
         });
@@ -61,43 +67,51 @@ public class NprNavigator implements Pilotable {
 
     }
 
-    public class Mp4 {
+    public class Mp4
+    {
         public String teaser;
         public String url;
 
-        public Mp4(String teaser, String url) {
+        public Mp4(String teaser, String url)
+        {
             this.teaser = teaser;
             this.url = url;
         }
     }
 
     @Override
-    public boolean up() {
+    public boolean up()
+    {
         return false;
     }
 
     @Override
-    public boolean down() {
+    public boolean down()
+    {
         return false;
     }
 
     @Override
-    public boolean next() {
+    public boolean next()
+    {
         return false;
     }
 
     @Override
-    public boolean previous() {
+    public boolean previous()
+    {
         return false;
     }
 
     @Override
-    public Object getContent() {
+    public Object getContent()
+    {
         return null;
     }
 
     @Override
-    public String getContentDescription() {
+    public String getContentDescription()
+    {
         return null;
     }
 

@@ -18,9 +18,10 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class DsSyncService extends IntentService {
-
-    public DsSyncService() {
+public class DsSyncService extends IntentService
+{
+    public DsSyncService()
+    {
         super("Sync Service");
     }
 
@@ -31,7 +32,8 @@ public class DsSyncService extends IntentService {
     public static final String KEY_SORT_ORDER = "ds_sort_order";
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void onHandleIntent(Intent intent)
+    {
         final Bundle extras = intent.getExtras();
         final ContentResolver cr = getContentResolver();
 
@@ -55,7 +57,8 @@ public class DsSyncService extends IntentService {
         return;
     }
 
-    public static ContentValues[] getContentsFromUrl(String url, Uri uri, JsonPath contentsPath, String[] keyStrings, JsonPath[] valuePaths) {
+    public static ContentValues[] getContentsFromUrl(String url, Uri uri, JsonPath contentsPath, String[] keyStrings, JsonPath[] valuePaths)
+    {
         final JsonNode baseNode = HttpHelper.getJsonAtUrl(url);
         final ArrayNode contentsNode = (ArrayNode) JsonPath.nodeAtPath(baseNode, contentsPath);
         final ContentValues[] contents = new ContentValues[contentsNode.size()];
@@ -76,22 +79,27 @@ public class DsSyncService extends IntentService {
         return contents;
     }
 
-    public static class JsonPath {
-        public JsonPath(Object... objects) {
+    public static class JsonPath
+    {
+        public JsonPath(Object... objects)
+        {
             mPath = objects;
         }
 
         private Object[] mPath;
 
-        public int getLength() {
+        public int getLength()
+        {
             return mPath.length;
         }
 
-        public Object get(int position) {
+        public Object get(int position)
+        {
             return mPath[position];
         }
 
-        public static JsonNode nodeAtPath(JsonNode sourceNode, JsonPath path) {
+        public static JsonNode nodeAtPath(JsonNode sourceNode, JsonPath path)
+        {
             JsonNode currentNode = sourceNode;
             JsonNode nextNode = MissingNode.getInstance();
 
@@ -112,12 +120,14 @@ public class DsSyncService extends IntentService {
         }
     }
 
-    public static class HttpHelper {
+    public static class HttpHelper
+    {
 
         public static int CONNECT_TIMEOUT = 10000;
         public static int READ_TIMEOUT = 10000;
 
-        public static JsonNode getJsonAtUrl(String urlString) {
+        public static JsonNode getJsonAtUrl(String urlString)
+        {
             if (BuildConfig.DEBUG)
                 Log.d(HttpHelper.class.getName(), "getting resource @ " + urlString);
 

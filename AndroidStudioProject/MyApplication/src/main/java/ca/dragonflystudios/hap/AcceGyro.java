@@ -9,14 +9,16 @@ import android.util.Log;
 import java.util.Observable;
 import java.util.Observer;
 
-public class AcceGyro extends Observable implements SensorEventListener {
-
+public class AcceGyro extends Observable implements SensorEventListener
+{
     public static final float ALPHA = 0.8f;
     public static final int DOF = 3;
 
-    public static class Logger implements Observer {
+    public static class Logger implements Observer
+    {
         @Override
-        public void update(Observable observable, Object data) {
+        public void update(Observable observable, Object data)
+        {
             final float[] values = (float[]) data;
             for (int i = 0; i < DOF; i++)
                 Log.d(getClass().getName(), "Acceleration: " + ((i == 0) ? "    x = " : ((i == 1) ? "    y = " : "    z = ")) + values[i]);
@@ -26,7 +28,8 @@ public class AcceGyro extends Observable implements SensorEventListener {
         }
     }
 
-    public AcceGyro(SensorManager sensorManager) {
+    public AcceGyro(SensorManager sensorManager)
+    {
         mSensorManager = sensorManager;
     }
 
@@ -37,7 +40,8 @@ public class AcceGyro extends Observable implements SensorEventListener {
 
     private SensorManager mSensorManager;
 
-    public void startListening() {
+    public void startListening()
+    {
         mSensorManager.registerListener(this,
                 mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER),
                 SensorManager.SENSOR_DELAY_NORMAL);
@@ -46,11 +50,13 @@ public class AcceGyro extends Observable implements SensorEventListener {
                 SensorManager.SENSOR_DELAY_NORMAL);
     }
 
-    public void stopListening() {
+    public void stopListening()
+    {
         mSensorManager.unregisterListener(this);
     }
 
-    private void update(SensorEvent event) {
+    private void update(SensorEvent event)
+    {
         switch (event.sensor.getType()) {
             case Sensor.TYPE_ACCELEROMETER:
                 updateAcceleration(event);
@@ -67,7 +73,8 @@ public class AcceGyro extends Observable implements SensorEventListener {
         notifyObservers(mValues);
     }
 
-    private void updateAcceleration(SensorEvent event) {
+    private void updateAcceleration(SensorEvent event)
+    {
         for (int i = 0; i < DOF; i++) {
             mGravity[i] = ALPHA * mGravity[i] + (1 - ALPHA) * event.values[i];
             mAcceleration[i] = event.values[i] - mGravity[i];
@@ -75,31 +82,37 @@ public class AcceGyro extends Observable implements SensorEventListener {
         }
     }
 
-    private void updateAngularSpeed(SensorEvent event) {
+    private void updateAngularSpeed(SensorEvent event)
+    {
         for (int i = 0; i < DOF; i++) {
             mAngularSpeed[i] = event.values[i];
             mValues[i + DOF] = mAngularSpeed[i];
         }
     }
 
-    public float[] getAcceleration() {
+    public float[] getAcceleration()
+    {
         return mAcceleration;
     }
 
-    public float[] getAngularSpeed() {
+    public float[] getAngularSpeed()
+    {
         return mAngularSpeed;
     }
 
-    public float[] getValues() {
+    public float[] getValues()
+    {
         return mValues;
     }
 
     @Override
-    public void onSensorChanged(SensorEvent event) {
+    public void onSensorChanged(SensorEvent event)
+    {
         update(event);
     }
 
     @Override
-    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    public void onAccuracyChanged(Sensor sensor, int accuracy)
+    {
     }
 }

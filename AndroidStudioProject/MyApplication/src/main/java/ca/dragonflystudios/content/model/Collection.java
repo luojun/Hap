@@ -59,6 +59,5 @@ public class Collection
         mIndex = collectionIndex;
         UriManager.registerCollection(model.authority, model.getIndex(), this.name, collectionIndex);
     }
-
 }
 

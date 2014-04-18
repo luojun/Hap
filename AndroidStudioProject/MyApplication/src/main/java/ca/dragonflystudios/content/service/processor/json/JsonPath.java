@@ -9,23 +9,27 @@ import ca.dragonflystudios.content.model.ContentPath;
  * Created by jun on 2014-04-18.
  */
 
-public class JsonPath implements ContentPath {
-
-    public JsonPath(Object... objects) {
+public class JsonPath implements ContentPath
+{
+    public JsonPath(Object... objects)
+    {
         mPath = objects;
     }
 
     private Object[] mPath;
 
-    public int getLength() {
+    public int getLength()
+    {
         return mPath.length;
     }
 
-    public Object get(int position) {
+    public Object get(int position)
+    {
         return mPath[position];
     }
 
-    public static JsonNode nodeAtPath(JsonNode sourceNode, JsonPath path) {
+    public static JsonNode nodeAtPath(JsonNode sourceNode, JsonPath path)
+    {
         JsonNode currentNode = sourceNode;
         JsonNode nextNode = MissingNode.getInstance();
 

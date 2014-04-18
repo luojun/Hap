@@ -10,8 +10,6 @@ import ca.dragonflystudios.content.service.processor.StreamParser;
 
 /**
  * Created by jun on 2014-04-18.
- *
- *
  */
 
 // NOTE: We use IntentService for a quick start. Requests sent to an IntentService are queued and handled
@@ -60,7 +58,8 @@ public class HttpService extends IntentService
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
+    protected void onHandleIntent(Intent intent)
+    {
         final Bundle extras = intent.getExtras();
         final String requestUrl = extras.getString(KEY_REQUST_URL);
         final String eTag = extras.getString(KEY_ETAG);

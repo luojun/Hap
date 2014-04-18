@@ -21,7 +21,8 @@ public class HttpHelper
     public static int CONNECT_TIMEOUT = 10000;
     public static int READ_TIMEOUT = 10000;
 
-    protected static HttpService.Result request(HttpService.Request request, StreamParser parser) {
+    protected static HttpService.Result request(HttpService.Request request, StreamParser parser)
+    {
 
         HttpURLConnection connection = null;
         final HttpService.Result result = new HttpService.Result(0, null, null, 0);
@@ -41,7 +42,7 @@ public class HttpHelper
 
             result.responseCode = connection.getResponseCode();
             switch (result.responseCode) {
-                case HttpStatus.SC_OK :
+                case HttpStatus.SC_OK:
                     String newTag = connection.getHeaderField("ETag");
                     if (null == request.eTag || null == newTag || !request.equals(newTag)) {
                         result.parsed = parser.parse(connection.getInputStream());
@@ -49,7 +50,7 @@ public class HttpHelper
                     result.ifModifiedSince = connection.getIfModifiedSince();
                     result.eTag = newTag;
                     break;
-                case HttpStatus.SC_NOT_MODIFIED :
+                case HttpStatus.SC_NOT_MODIFIED:
                     if (BuildConfig.DEBUG)
                         Log.d(HttpHelper.class.getName(), "Not modified: " + url);
                     result.ifModifiedSince = connection.getIfModifiedSince();

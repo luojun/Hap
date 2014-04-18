@@ -17,23 +17,26 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class DsContentProvider extends ContentProvider {
-
+public class DsContentProvider extends ContentProvider
+{
     private static final UriMatcher sUriMatcher = new UriMatcher(UriMatcher.NO_MATCH);
 
     private static final Object sLock = new Object();
 
-    public static class Model {
+    public static class Model
+    {
         public static ArrayList<Model> sModels = new ArrayList<Model>();
 
-        public static Model getModel(int index) {
-            synchronized(sLock) {
+        public static Model getModel(int index)
+        {
+            synchronized (sLock) {
                 return sModels.get(index);
             }
         }
 
-        public static Model getModelByAuthority(String authority) {
-            synchronized(sLock) {
+        public static Model getModelByAuthority(String authority)
+        {
+            synchronized (sLock) {
                 for (Model model : sModels) {
                     if (model.authority.equalsIgnoreCase(authority))
                         return model;
@@ -46,13 +49,15 @@ public class DsContentProvider extends ContentProvider {
 
         private static final AtomicInteger sNextModelIndex = new AtomicInteger(0);
 
-        private static int getNextModelIndex() {
+        private static int getNextModelIndex()
+        {
             return sNextModelIndex.getAndIncrement();
         }
 
         private final AtomicInteger mNextCollectionIndex;
 
-        private int getNextCollectionIndex() {
+        private int getNextCollectionIndex()
+        {
             int index = mNextCollectionIndex.getAndIncrement();
             if (index >= MAX_COLLECTIONS)
                 throw new RuntimeException("At the limit for the number of collections in model " + name + ". Cannot create more collections!");
@@ -61,7 +66,8 @@ public class DsContentProvider extends ContentProvider {
 
         private int mModelIndex;
 
-        public int getIndex() {
+        public int getIndex()
+        {
             return mModelIndex;
         }
 
@@ -71,17 +77,20 @@ public class DsContentProvider extends ContentProvider {
         public ArrayList<Collection> collections;
         public SQLiteDatabase database;
 
-        synchronized public void addCollection(Collection collection) {
+        synchronized public void addCollection(Collection collection)
+        {
             int index = getNextCollectionIndex();
             collection.setModel(this, index);
             collections.add(index, collection);
         }
 
-        synchronized public Collection getCollection(int index) {
+        synchronized public Collection getCollection(int index)
+        {
             return collections.get(index);
         }
 
-        synchronized public Collection getCollectionByName(String name) {
+        synchronized public Collection getCollectionByName(String name)
+        {
             for (Collection collection : collections) {
                 if (collection.name.equals(name))
                     return collection;
@@ -89,7 +98,8 @@ public class DsContentProvider extends ContentProvider {
             return null;
         }
 
-        public Model(String name, String authority, int version, Collection[] collections) {
+        public Model(String name, String authority, int version, Collection[] collections)
+        {
             mModelIndex = getNextModelIndex();
             mNextCollectionIndex = new AtomicInteger(0);
             this.name = name;
@@ -104,28 +114,33 @@ public class DsContentProvider extends ContentProvider {
             }
         }
 
-        public boolean initializeDb(Context context) {
+        public boolean initializeDb(Context context)
+        {
             Model.ModelDbOpenHelper helper = new ModelDbOpenHelper(context, this);
             database = helper.getWritableDatabase();
             return (null != database);
         }
 
-        private static class ModelDbOpenHelper extends SQLiteOpenHelper {
+        private static class ModelDbOpenHelper extends SQLiteOpenHelper
+        {
             private final Model mModel;
 
-            public ModelDbOpenHelper(Context context, Model model) {
+            public ModelDbOpenHelper(Context context, Model model)
+            {
                 super(context, model.authority + ".db", null, model.version);
                 mModel = model;
             }
 
             @Override
-            public void onCreate(SQLiteDatabase db) {
+            public void onCreate(SQLiteDatabase db)
+            {
                 for (Collection collection : mModel.collections)
                     collection.createTable(db);
             }
 
             @Override
-            public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
+            {
                 // TODO: content model handles upgrade according to Web API versions
                 for (Collection collection : mModel.collections)
                     collection.dropTable(db);
@@ -135,7 +150,8 @@ public class DsContentProvider extends ContentProvider {
         }
     }
 
-    public static class Collection {
+    public static class Collection
+    {
         public static final String KEY_PRIMARY = "_id";
 
         private Model mModel;
@@ -147,15 +163,18 @@ public class DsContentProvider extends ContentProvider {
         public String[] columnNames;
 
 
-        public Model getModel() {
+        public Model getModel()
+        {
             return mModel;
         }
 
-        public int getIndex() {
+        public int getIndex()
+        {
             return mIndex;
         }
 
-        public Collection(String name, String[] columnNames, String url, DsSyncService.JsonPath contentsPath, DsSyncService.JsonPath[] valuePaths) {
+        public Collection(String name, String[] columnNames, String url, DsSyncService.JsonPath contentsPath, DsSyncService.JsonPath[] valuePaths)
+        {
             this.name = name;
             this.url = url;
             this.contentsPath = contentsPath;
@@ -163,28 +182,33 @@ public class DsContentProvider extends ContentProvider {
             this.columnNames = columnNames;
         }
 
-        public Uri getUri() {
+        public Uri getUri()
+        {
             return Uri.parse("content://" + getModel().authority + "/" + name);
         }
 
         /* TODO: more sensible implementation of mapping selection to columnName and selectionArgs to query terms
          */
         // The default implementation ignores selectionArgs
-        public String getUrl(String[] selectionArgs) {
+        public String getUrl(String[] selectionArgs)
+        {
             return url;
         }
 
-        protected void setModel(Model model, int index) {
+        protected void setModel(Model model, int index)
+        {
             mModel = model;
             mIndex = index;
             sUriMatcher.addURI(model.authority, this.name, model.getIndex() * Model.MAX_COLLECTIONS + index);
         }
 
-        protected void createTable(SQLiteDatabase database) {
+        protected void createTable(SQLiteDatabase database)
+        {
             database.execSQL(getTableCreationString());
         }
 
-        private String getTableCreationString() {
+        private String getTableCreationString()
+        {
             StringBuilder sb = new StringBuilder("CREATE TABLE ");
             sb.append(this.name);
 
@@ -203,11 +227,13 @@ public class DsContentProvider extends ContentProvider {
             return sb.toString();
         }
 
-        protected void dropTable(SQLiteDatabase database) {
+        protected void dropTable(SQLiteDatabase database)
+        {
             database.execSQL("DROP TABLE IF EXISTS " + this.name);
         }
 
-        public void requestSync(Context context, String selection, String[] selectionArgs, String sortOrder) {
+        public void requestSync(Context context, String selection, String[] selectionArgs, String sortOrder)
+        {
             final Intent intent = new Intent(context, DsSyncService.class);
             intent.putExtra(DsSyncService.KEY_MODEL_INDEX, getModel().getIndex());
             intent.putExtra(DsSyncService.KEY_COLLECTION_INDEX, getIndex());
@@ -219,32 +245,38 @@ public class DsContentProvider extends ContentProvider {
     }
 
     private static Collection NprPrograms = new Collection("programs", new String[]{"id", "title", "description"},
-                "http://api.npr.org/list?id=3004&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("item"),
-                new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new  DsSyncService.JsonPath("additionalInfo", "$text")});
+            "http://api.npr.org/list?id=3004&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("item"),
+            new DsSyncService.JsonPath[]{new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("title", "$text"), new DsSyncService.JsonPath("additionalInfo", "$text")});
 
-    private static Collection NprProgramItems = new Collection("program_items", new String[]{"id", "program_id", "title", "teaser", "date", "mp4" },
-                "http://api.npr.org/query?id=%s&fields=title,teaser,storyDate,audio&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("list", "story"),
-                new DsSyncService.JsonPath[]{ new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("show", 0, "program", "id"), new DsSyncService.JsonPath("title", "$text"),
-                    new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("storyDate", "$text"), new DsSyncService.JsonPath("audio", 0, "format", "mp4", "$text")}) {
+    private static Collection NprProgramItems = new Collection("program_items", new String[]{"id", "program_id", "title", "teaser", "date", "mp4"},
+            "http://api.npr.org/query?id=%s&fields=title,teaser,storyDate,audio&output=JSON&numResults=20&apiKey=MDEyMzY0MjM5MDEzODEyOTAxOTFmYWE4ZA001", new DsSyncService.JsonPath("list", "story"),
+            new DsSyncService.JsonPath[]{new DsSyncService.JsonPath("id"), new DsSyncService.JsonPath("show", 0, "program", "id"), new DsSyncService.JsonPath("title", "$text"),
+                    new DsSyncService.JsonPath("teaser", "$text"), new DsSyncService.JsonPath("storyDate", "$text"), new DsSyncService.JsonPath("audio", 0, "format", "mp4", "$text")}
+    )
+    {
         @Override
-        public String getUrl(String[] selectionArgs) {
+        public String getUrl(String[] selectionArgs)
+        {
             return String.format(url, selectionArgs);
         }
     };
 
-    private static Model NprModel = new Model("NPR News", "api.npr.org", 1, new Collection[] {NprPrograms, NprProgramItems});
+    private static Model NprModel = new Model("NPR News", "api.npr.org", 1, new Collection[]{NprPrograms, NprProgramItems});
 
-    public static class ModelCollectionPair {
+    public static class ModelCollectionPair
+    {
         public DsContentProvider.Model model;
         public DsContentProvider.Collection collection;
 
-        ModelCollectionPair(DsContentProvider.Model model, DsContentProvider.Collection collection) {
+        ModelCollectionPair(DsContentProvider.Model model, DsContentProvider.Collection collection)
+        {
             this.model = model;
             this.collection = collection;
         }
     }
 
-    public static ModelCollectionPair decodeUri(Uri uri) {
+    public static ModelCollectionPair decodeUri(Uri uri)
+    {
         final int code = sUriMatcher.match(uri);
         if (-1 == code)
             throw new IllegalArgumentException("Unknown URI " + uri);
@@ -255,7 +287,8 @@ public class DsContentProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
+    public int delete(Uri uri, String selection, String[] selectionArgs)
+    {
         ModelCollectionPair pair = decodeUri(uri);
         int count = pair.model.database.delete(pair.collection.name, selection, selectionArgs);
         // getContext().getContentResolver().notifyChange(uri, null);
@@ -263,13 +296,15 @@ public class DsContentProvider extends ContentProvider {
     }
 
     @Override
-    public String getType(Uri uri) {
+    public String getType(Uri uri)
+    {
         ModelCollectionPair pair = decodeUri(uri);
         return "vnd.android.cursor.dir/vnd." + pair.model.authority;
     }
 
     @Override
-    public Uri insert(Uri uri, ContentValues values) {
+    public Uri insert(Uri uri, ContentValues values)
+    {
         ModelCollectionPair pair = decodeUri(uri);
 
         Cursor c = pair.model.database.rawQuery("SELECT * FROM " + pair.collection.name + " WHERE _id = '" + values.getAsString("_id") + "'", null);
@@ -293,7 +328,8 @@ public class DsContentProvider extends ContentProvider {
     }
 
     @Override
-    public int bulkInsert(Uri uri, ContentValues[] values) {
+    public int bulkInsert(Uri uri, ContentValues[] values)
+    {
         ModelCollectionPair pair = decodeUri(uri);
         String tableName = pair.collection.name;
         SQLiteDatabase db = pair.model.database;
@@ -321,7 +357,8 @@ public class DsContentProvider extends ContentProvider {
     }
 
     @Override
-    public boolean onCreate() {
+    public boolean onCreate()
+    {
         for (Model model : Model.sModels)
             if (!model.initializeDb(getContext()))
                 return false;
@@ -329,7 +366,8 @@ public class DsContentProvider extends ContentProvider {
     }
 
     @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder)
+    {
         Log.w(getClass().getName(), "query is being called with uri " + uri);
         final ModelCollectionPair pair = decodeUri(uri);
         final int modelIndex = pair.model.getIndex();
@@ -346,7 +384,8 @@ public class DsContentProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs)
+    {
         ModelCollectionPair pair = decodeUri(uri);
         int count = pair.model.database.updateWithOnConflict(pair.collection.name, values, selection, selectionArgs, SQLiteDatabase.CONFLICT_REPLACE);
         getContext().getContentResolver().notifyChange(uri, null);

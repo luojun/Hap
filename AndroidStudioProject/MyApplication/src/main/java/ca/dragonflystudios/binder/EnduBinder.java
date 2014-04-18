@@ -14,8 +14,10 @@ import ca.dragonflystudios.hap.DsContentProvider;
  * Created by Jun Luo on 13-12-04.
  */
 
-public class EnduBinder implements LoaderManager.LoaderCallbacks<Cursor> {
-    public interface BindEnduCallback {
+public class EnduBinder implements LoaderManager.LoaderCallbacks<Cursor>
+{
+    public interface BindEnduCallback
+    {
         public void bindEndu(Cursor cursor, int position);
     }
 
@@ -24,8 +26,10 @@ public class EnduBinder implements LoaderManager.LoaderCallbacks<Cursor> {
 
     private static int sLoaderId = 1024;
     private static Object sLock = new Object();
-    private static int getNextLoaderId() {
-        synchronized(sLock) {
+
+    private static int getNextLoaderId()
+    {
+        synchronized (sLock) {
             return ++sLoaderId;
         }
     }
@@ -40,7 +44,8 @@ public class EnduBinder implements LoaderManager.LoaderCallbacks<Cursor> {
     String mSortOrder;
     Endu mEndu;
 
-    public EnduBinder(LoaderManager loaderManager, Context context, Endu endu, DsContentProvider.Collection collection, String selection, String[] selectionArgs, String sortOrder) {
+    public EnduBinder(LoaderManager loaderManager, Context context, Endu endu, DsContentProvider.Collection collection, String selection, String[] selectionArgs, String sortOrder)
+    {
         mLoaderManager = loaderManager;
         mContext = context;
         mEndu = endu;
@@ -53,25 +58,29 @@ public class EnduBinder implements LoaderManager.LoaderCallbacks<Cursor> {
         mLoaderManager.initLoader(mLoaderId, null, this);
     }
 
-    public int getLoaderId() {
+    public int getLoaderId()
+    {
         return mLoaderId;
     }
 
     @Override
-    public Loader<Cursor> onCreateLoader(int i, Bundle bundle) {
+    public Loader<Cursor> onCreateLoader(int i, Bundle bundle)
+    {
         mCollection.requestSync(mContext, mSelection, mSelectionArgs, mSortOrder);
         return new CursorLoader(mContext, mCollection.getUri(), mCollection.columnNames, mSelection, mSelectionArgs, mSortOrder);
     }
 
     @Override
-    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor) {
+    public void onLoadFinished(Loader<Cursor> cursorLoader, Cursor cursor)
+    {
         if (mLoaderId == cursorLoader.getId()) {
             mEndu.updateCursor(cursor, 0);
         }
     }
 
     @Override
-    public void onLoaderReset(Loader<Cursor> cursorLoader) {
+    public void onLoaderReset(Loader<Cursor> cursorLoader)
+    {
         if (mLoaderId == cursorLoader.getId()) {
             mEndu.updateCursor(null, -1);
         }

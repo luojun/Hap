@@ -14,7 +14,8 @@ import android.util.Log;
 
 import java.util.Locale;
 
-public class HapActivity extends Activity implements TextToSpeech.OnInitListener {
+public class HapActivity extends Activity implements TextToSpeech.OnInitListener
+{
     private static final boolean LOG = false;
     private AcceGyroGraphView mGraphView;
     private AcceGyro.Logger mLogger;
@@ -27,8 +28,10 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
     // TODO: refactor the following and PilotableContent in terms of MEC -- Model Endu Controller
     // Endu <=> View; Windah <=> Window (ah is beginning of German Ahre; Endu is part of French entendu, like how "view" originated from French "seen".
 
-    private BroadcastReceiver mReceiver = new BroadcastReceiver() {
-        private void playMp4(PilotableContent.Mp4 mp4) {
+    private BroadcastReceiver mReceiver = new BroadcastReceiver()
+    {
+        private void playMp4(PilotableContent.Mp4 mp4)
+        {
             // mTts.speak(mp4.teaser, TextToSpeech.QUEUE_FLUSH, null);
             Uri uri = Uri.parse(mp4.url);
             Intent i = new Intent(Intent.ACTION_VIEW);
@@ -37,13 +40,14 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
         }
 
         @Override
-        public void onReceive(Context context, Intent intent) {
+        public void onReceive(Context context, Intent intent)
+        {
             Log.w(getClass().getName(), "received: " + intent.getStringExtra("TYPE") + " " + intent.getStringExtra("VALUE"));
             GyroGestureRecognizer.GyroGesture gesture = GyroGestureRecognizer.GyroGesture.valueOf(GyroGestureRecognizer.GyroGesture.class, intent.getStringExtra("VALUE"));
             switch (gesture) {
                 case UP:
                     if (mContent.up()) {
-                        mTts.speak((String)mContent.getContentDescription(), TextToSpeech.QUEUE_FLUSH, null);
+                        mTts.speak((String) mContent.getContentDescription(), TextToSpeech.QUEUE_FLUSH, null);
                     } else
                         mTts.speak("Sorry. Cannot go up anymore.", TextToSpeech.QUEUE_FLUSH, null);
                     break;
@@ -51,10 +55,10 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
                     if (mContent.down()) {
                         Object content = mContent.getContent();
                         if (content instanceof String[]) {
-                            mTts.speak((String)mContent.getContentDescription() + ". Tilt left or right to choose.", TextToSpeech.QUEUE_FLUSH, null);
-                            mTts.speak((String)mContent.getContent(), TextToSpeech.QUEUE_ADD, null);
+                            mTts.speak((String) mContent.getContentDescription() + ". Tilt left or right to choose.", TextToSpeech.QUEUE_FLUSH, null);
+                            mTts.speak((String) mContent.getContent(), TextToSpeech.QUEUE_ADD, null);
                         } else if (content instanceof String) {
-                            mTts.speak((String)content, TextToSpeech.QUEUE_FLUSH, null);
+                            mTts.speak((String) content, TextToSpeech.QUEUE_FLUSH, null);
                         } else if (content instanceof PilotableContent.Mp4) {
                             playMp4((PilotableContent.Mp4) content);
                         }
@@ -65,7 +69,7 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
                     if (mContent.previous()) {
                         Object content = mContent.getContent();
                         if (content instanceof String) {
-                            mTts.speak((String)content, TextToSpeech.QUEUE_FLUSH, null);
+                            mTts.speak((String) content, TextToSpeech.QUEUE_FLUSH, null);
                         } else if (content instanceof PilotableContent.Mp4) {
                             playMp4((PilotableContent.Mp4) content);
                         }
@@ -76,7 +80,7 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
                     if (mContent.next()) {
                         Object content = mContent.getContent();
                         if (content instanceof String) {
-                            mTts.speak((String)content, TextToSpeech.QUEUE_FLUSH, null);
+                            mTts.speak((String) content, TextToSpeech.QUEUE_FLUSH, null);
                         } else if (content instanceof PilotableContent.Mp4) {
                             playMp4((PilotableContent.Mp4) content);
                         }
@@ -92,7 +96,8 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
     };
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
 
         mContent = new NprNavigator(this, getLoaderManager());
@@ -110,21 +115,24 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
     }
 
     @Override
-    protected void onResume() {
+    protected void onResume()
+    {
         super.onResume();
         LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, new IntentFilter(GyroGestureRecognizer.NAVIGATION_ACTION));
         mAcceGyro.startListening();
     }
 
     @Override
-    protected void onPause() {
+    protected void onPause()
+    {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver);
         mAcceGyro.stopListening();
         super.onPause();
     }
 
     @Override
-    protected void onDestroy() {
+    protected void onDestroy()
+    {
         mAcceGyro.deleteObservers();
         if (mTts != null)
             mTts.shutdown();
@@ -132,7 +140,8 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
     }
 
     @Override
-    public void onInit(int status) {
+    public void onInit(int status)
+    {
         if (status == TextToSpeech.SUCCESS) {
             Log.w(getClass().getName(), "TTS initialized.");
             int result = mTts.setLanguage(Locale.CANADA);
