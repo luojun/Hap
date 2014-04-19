@@ -5,10 +5,13 @@ package ca.dragonflystudios.content.provider;
  */
 
 import android.content.ContentProvider;
+import android.content.ContentProviderOperation;
+import android.content.ContentProviderResult;
 import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.OperationApplicationException;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
@@ -16,11 +19,12 @@ import android.database.sqlite.SQLiteQueryBuilder;
 import android.net.Uri;
 import android.util.Log;
 
-import ca.dragonflystudios.content.model.Model;
-import ca.dragonflystudios.content.service.HttpService;
-import ca.dragonflystudios.hap.DsSyncService;
+import java.util.ArrayList;
 
-public class DssProvider extends ContentProvider
+import ca.dragonflystudios.content.model.Model;
+import ca.dragonflystudios.content.service.Service;
+
+public class Provider extends ContentProvider
 {
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs)
@@ -41,6 +45,8 @@ public class DssProvider extends ContentProvider
     @Override
     public Uri insert(Uri uri, ContentValues values)
     {
+        // TODO: check the correctness of this implementation!
+
         UriManager.MCD mcd = UriManager.resolve(uri);
 
         Cursor c = mcd.database.rawQuery("SELECT * FROM " + mcd.collection.name + " WHERE _id = '" + values.getAsString("_id") + "'", null);
@@ -93,6 +99,32 @@ public class DssProvider extends ContentProvider
     }
 
     @Override
+    public ContentProviderResult[] applyBatch(ArrayList<ContentProviderOperation> operations)
+    {
+        final int size = operations.size();
+        final ContentProviderResult[] results = new ContentProviderResult[size];
+
+        if (size > 1) {
+            final Uri uri = operations.get(0).getUri();
+            UriManager.MCD mcd = UriManager.resolve(uri);
+            SQLiteDatabase db = mcd.database;
+
+            db.beginTransaction();
+            try {
+                for (int i = 0; i < size; i++)
+                    results[i] = operations.get(i).apply(this, null, 0);
+                db.setTransactionSuccessful();
+            } catch (OperationApplicationException e) {
+                e.printStackTrace();
+            } finally {
+                db.endTransaction();
+            }
+        }
+
+        return results;
+    }
+
+    @Override
     public boolean onCreate()
     {
         for (Model model : Model.sModels) {
@@ -134,12 +166,13 @@ public class DssProvider extends ContentProvider
     private void requestSync(UriManager.MCD mcd, String selection, String[] selectionArgs, String sortOrder)
     {
         final Context context = getContext();
-        final Intent intent = new Intent(context, HttpService.class);
-        intent.putExtra(DsSyncService.KEY_MODEL_INDEX, mcd.model.getIndex());
-        intent.putExtra(DsSyncService.KEY_COLLECTION_INDEX, mcd.collection.getIndex());
-        intent.putExtra(DsSyncService.KEY_SELECTION, selection);
-        intent.putExtra(DsSyncService.KEY_SELECTION_ARGS, selectionArgs);
-        intent.putExtra(DsSyncService.KEY_SORT_ORDER, sortOrder);
+        final Intent intent = new Intent(context, Service.class);
+        intent.putExtra(Service.KEY_AUTHORITY, mcd.model.authority);
+        intent.putExtra(Service.KEY_MODEL_INDEX, mcd.model.getIndex());
+        intent.putExtra(Service.KEY_COLLECTION_INDEX, mcd.collection.getIndex());
+        intent.putExtra(Service.KEY_SELECTION, selection);
+        intent.putExtra(Service.KEY_SELECTION_ARGS, selectionArgs);
+        intent.putExtra(Service.KEY_SORT_ORDER, sortOrder);
         context.startService(intent);
     }
 }

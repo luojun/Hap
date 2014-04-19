@@ -16,6 +16,13 @@ public class DatabaseHelper
 {
     private static class DbOpenHelper extends SQLiteOpenHelper
     {
+        // TAI: can the cache stamps table correspond to a default Collection in a Model?
+        private static final String CREATE_CACHE_STAMPS_TABLE = new StringBuilder("CREATE TABLE _cache_stamps_ (")
+                .append("collection_id integer primary key").append(", ")
+                .append("etag text").append(", ")
+                .append("ifmodifiedsince integer")
+                .append(");").toString();
+
         private Model mModel;
 
         public DbOpenHelper(Context context, Model model)
@@ -27,6 +34,8 @@ public class DatabaseHelper
         @Override
         public void onCreate(SQLiteDatabase db)
         {
+            db.execSQL(CREATE_CACHE_STAMPS_TABLE);
+
             for (Collection collection : mModel.collections)
                 createTable(db, collection);
         }
@@ -34,7 +43,7 @@ public class DatabaseHelper
         @Override
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
         {
-            // TODO: content model handles upgrade according to Web API versions
+            db.execSQL("DROP TABLE IF EXISTS _cache_stamps_");
             for (Collection collection : mModel.collections)
                 dropTable(db, collection);
 
@@ -51,6 +60,13 @@ public class DatabaseHelper
     public static void createTable(SQLiteDatabase database, Collection collection)
     {
         database.execSQL(getTableCreationString(collection));
+
+        // initialize the entry for the collection
+        database.execSQL(new StringBuilder("INSERT INTO _cache_stamps_ (collection_id, etag, ifmodifiedsince) values(")
+                .append(collection.getIndex()).append(", ")
+                .append("''").append(", ")
+                .append(0L).append(");")
+                .toString());
     }
 
     public static void dropTable(SQLiteDatabase database, Collection collection)

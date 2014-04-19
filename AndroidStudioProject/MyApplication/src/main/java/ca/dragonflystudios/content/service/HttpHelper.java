@@ -21,11 +21,11 @@ public class HttpHelper
     public static int CONNECT_TIMEOUT = 10000;
     public static int READ_TIMEOUT = 10000;
 
-    protected static HttpService.Result request(HttpService.Request request, StreamParser parser)
+    protected static Service.Result request(Service.Request request, StreamParser parser)
     {
 
         HttpURLConnection connection = null;
-        final HttpService.Result result = new HttpService.Result(0, null, null, 0);
+        final Service.Result result = new Service.Result(0, null, null, 0);
 
         try {
             final URL url = new URL(request.url);
