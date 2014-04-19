@@ -9,7 +9,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import java.io.IOException;
 import java.io.InputStream;
 
-import ca.dragonflystudios.content.model.ContentPath;
+import ca.dragonflystudios.content.service.processor.ContentPath;
 import ca.dragonflystudios.content.service.processor.ContentsExtractor;
 import ca.dragonflystudios.content.service.processor.StreamParser;
 

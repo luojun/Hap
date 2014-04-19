@@ -3,6 +3,7 @@ package ca.dragonflystudios.content.model;
 import android.net.Uri;
 
 import ca.dragonflystudios.content.provider.UriManager;
+import ca.dragonflystudios.content.service.processor.ContentPath;
 
 /**
  * Created by jun on 2014-04-18.

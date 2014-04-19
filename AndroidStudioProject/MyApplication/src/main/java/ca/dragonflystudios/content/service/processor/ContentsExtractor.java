@@ -2,8 +2,6 @@ package ca.dragonflystudios.content.service.processor;
 
 import android.content.ContentValues;
 
-import ca.dragonflystudios.content.model.ContentPath;
-
 /**
  * Created by jun on 2014-04-18.
  */
