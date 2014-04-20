@@ -7,6 +7,7 @@ import android.database.Cursor;
 import ca.dragonflystudios.Player.ContentPlayer;
 import ca.dragonflystudios.binder.ListBinder;
 import ca.dragonflystudios.endu.ListEndu;
+import ca.dragonflystudios.content.model.*;
 
 /**
  * Created by Jun Luo on 13-12-04.
@@ -54,7 +55,7 @@ public class NprNavigator implements Pilotable
             }
         });
 
-        DsContentProvider.Collection collection = DsContentProvider.Model.getModelByAuthority("api.npr.org").getCollectionByName("programs");
+        Collection collection = Model.getModelByAuthority("api.npr.org").getCollectionByName("programs");
         mProgramsBinder = new ListBinder(loaderManager, context, mProgramsEndu, collection, null, null, null);
         mCurrentProgramBinder = null;
 

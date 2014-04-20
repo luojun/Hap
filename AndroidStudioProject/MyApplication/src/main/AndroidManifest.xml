@@ -32,11 +32,11 @@
         </activity>
 
         <provider
-            android:name="ca.dragonflystudios.hap.DsContentProvider"
+            android:name="ca.dragonflystudios.content.provider.Provider"
             android:authorities="api.npr.org"
             android:exported="false" />
 
-        <service android:name="ca.dragonflystudios.hap.DsSyncService" />
+        <service android:name="ca.dragonflystudios.content.service.Service" />
     </application>
 
 </manifest>

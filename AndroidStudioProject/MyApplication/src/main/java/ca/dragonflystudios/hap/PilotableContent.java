@@ -8,6 +8,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 
+import ca.dragonflystudios.content.model.*;
+
 public class PilotableContent implements Pilotable, LoaderManager.LoaderCallbacks<Cursor>
 {
     private final static String NPR_AUTHORITY = "api.npr.org";
@@ -54,14 +56,12 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
     {
         switch (i) {
             case PROGRAMS_LOADER_ID:
-                DsContentProvider.Collection collection = DsContentProvider.Model.getModelByAuthority("api.npr.org").getCollectionByName("programs");
-                collection.requestSync(mContext, null, null, null);
-                return new CursorLoader(mContext, collection.getUri(), collection.columnNames, null, null, null);
+                Collection collection = Model.getModelByAuthority("api.npr.org").getCollectionByName("programs");
+                return new CursorLoader(mContext, collection.getUri(), collection.itemFieldNames, null, null, null);
             case PROGRAM_ITEMS_LOADER_ID:
                 String program_id = mProgramsCursor.getString(mProgramsCursor.getColumnIndex("id"));
-                collection = DsContentProvider.Model.getModelByAuthority("api.npr.org").getCollectionByName("program_items");
-                collection.requestSync(mContext, "program_id = ?", new String[]{program_id}, null);
-                return new CursorLoader(mContext, collection.getUri(), collection.columnNames, "program_id = " + program_id, null, null);
+                collection = Model.getModelByAuthority("api.npr.org").getCollectionByName("program_items");
+                return new CursorLoader(mContext, collection.getUri(), collection.itemFieldNames, "program_id = " + program_id, null, null);
             default:
                 throw new RuntimeException("Invalid loader id: " + i);
         }

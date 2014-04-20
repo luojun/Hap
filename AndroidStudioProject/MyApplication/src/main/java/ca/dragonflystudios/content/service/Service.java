@@ -16,6 +16,7 @@ import java.util.ArrayList;
 
 import ca.dragonflystudios.content.service.processor.ContentsExtractor;
 import ca.dragonflystudios.content.service.processor.StreamParser;
+import ca.dragonflystudios.content.service.processor.json.JsonProcessor;
 import ca.dragonflystudios.hap.BuildConfig;
 
 /**
@@ -69,10 +70,15 @@ public class Service extends IntentService
     public static final String KEY_SELECTION_ARGS = "dss_selection_args";
     public static final String KEY_SORT_ORDER = "dss_sort_order";
 
-    public Service(StreamParser parser, ContentsExtractor extractor)
+    public Service()
     {
-        super("Http Service");
-        mExtractor = extractor;
+        super("Sync Service");
+
+        // TODO: lazy initialization of static processor instances and assignment of them to mParser
+        // and  mExtractor according to content-type of response
+        JsonProcessor processor = new JsonProcessor();
+        mParser = processor;
+        mExtractor = processor;
     }
 
     @Override

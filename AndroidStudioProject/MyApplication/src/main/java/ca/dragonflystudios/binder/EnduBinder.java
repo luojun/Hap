@@ -8,7 +8,7 @@ import android.database.Cursor;
 import android.os.Bundle;
 
 import ca.dragonflystudios.endu.Endu;
-import ca.dragonflystudios.hap.DsContentProvider;
+import ca.dragonflystudios.content.model.Collection;
 
 /**
  * Created by Jun Luo on 13-12-04.
@@ -38,13 +38,13 @@ public class EnduBinder implements LoaderManager.LoaderCallbacks<Cursor>
 
     LoaderManager mLoaderManager;
     Context mContext;
-    DsContentProvider.Collection mCollection;
+    Collection mCollection;
     String mSelection;
     String[] mSelectionArgs;
     String mSortOrder;
     Endu mEndu;
 
-    public EnduBinder(LoaderManager loaderManager, Context context, Endu endu, DsContentProvider.Collection collection, String selection, String[] selectionArgs, String sortOrder)
+    public EnduBinder(LoaderManager loaderManager, Context context, Endu endu, Collection collection, String selection, String[] selectionArgs, String sortOrder)
     {
         mLoaderManager = loaderManager;
         mContext = context;
@@ -66,8 +66,7 @@ public class EnduBinder implements LoaderManager.LoaderCallbacks<Cursor>
     @Override
     public Loader<Cursor> onCreateLoader(int i, Bundle bundle)
     {
-        mCollection.requestSync(mContext, mSelection, mSelectionArgs, mSortOrder);
-        return new CursorLoader(mContext, mCollection.getUri(), mCollection.columnNames, mSelection, mSelectionArgs, mSortOrder);
+        return new CursorLoader(mContext, mCollection.getUri(), mCollection.itemFieldNames, mSelection, mSelectionArgs, mSortOrder);
     }
 
     @Override

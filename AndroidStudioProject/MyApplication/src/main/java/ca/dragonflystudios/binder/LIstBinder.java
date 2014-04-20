@@ -6,7 +6,7 @@ import android.content.Loader;
 import android.database.Cursor;
 
 import ca.dragonflystudios.endu.ListEndu;
-import ca.dragonflystudios.hap.DsContentProvider;
+import ca.dragonflystudios.content.model.Collection;
 
 /**
  * Created by Jun Luo on 13-12-02.
@@ -22,7 +22,7 @@ public class ListBinder extends EnduBinder implements LoaderManager.LoaderCallba
 {
     ListEndu mListEndu;
 
-    public ListBinder(LoaderManager loaderManager, Context context, ListEndu listEndu, DsContentProvider.Collection collection, String selection, String[] selectionArgs, String sortOrder)
+    public ListBinder(LoaderManager loaderManager, Context context, ListEndu listEndu, Collection collection, String selection, String[] selectionArgs, String sortOrder)
     {
         super(loaderManager, context, listEndu, collection, selection, selectionArgs, sortOrder);
         mListEndu = listEndu;
