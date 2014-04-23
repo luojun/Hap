@@ -52,7 +52,7 @@ public class UriManager
         final int modelIndex = code / Model.MAX_COLLECTIONS;
         final Model model = Model.getModel(modelIndex);
         final Collection collection = model.getCollection(code % Model.MAX_COLLECTIONS);
-        final SQLiteDatabase database = sDatabaseRegistry.get(model);
+        final SQLiteDatabase database = sDatabaseRegistry.get(modelIndex);
 
         return new MCD(model, collection, database);
     }

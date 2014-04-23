@@ -6,8 +6,9 @@ import android.database.Cursor;
 
 import ca.dragonflystudios.Player.ContentPlayer;
 import ca.dragonflystudios.binder.ListBinder;
+import ca.dragonflystudios.content.model.Collection;
+import ca.dragonflystudios.content.model.Model;
 import ca.dragonflystudios.endu.ListEndu;
-import ca.dragonflystudios.content.model.*;
 
 /**
  * Created by Jun Luo on 13-12-04.

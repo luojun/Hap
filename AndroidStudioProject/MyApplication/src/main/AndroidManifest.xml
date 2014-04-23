@@ -32,7 +32,7 @@
         </activity>
 
         <provider
-            android:name="ca.dragonflystudios.content.provider.Provider"
+            android:name="ca.dragonflystudios.hap.content.HapContentProvider"
             android:authorities="api.npr.org"
             android:exported="false" />
 
