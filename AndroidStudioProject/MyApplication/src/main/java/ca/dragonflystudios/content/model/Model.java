@@ -1,6 +1,7 @@
 package ca.dragonflystudios.content.model;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -11,12 +12,17 @@ public class Model
 {
     private static final Object sLock = new Object();
 
-    public static ArrayList<Model> sModels = new ArrayList<Model>();
+    public static final ArrayList<Model> sModels = new ArrayList<Model>();
 
-    public static Model getModel(int index)
+    public static ArrayList<Model> getModels()
+    {
+        return sModels;
+    }
+
+    public static Model getModel(int id)
     {
         synchronized (sLock) {
-            return sModels.get(index);
+            return sModels.get(id);
         }
     }
 
@@ -32,12 +38,13 @@ public class Model
     }
 
     public static final int MAX_COLLECTIONS = 1024;
+    public static final int RESERVED_COLLECTIONS = 24;
 
-    private static final AtomicInteger sNextModelIndex = new AtomicInteger(0);
+    private static final AtomicInteger sNextModelId = new AtomicInteger(0);
 
-    private static int getNextModelIndex()
+    private static int getNextModelId()
     {
-        return sNextModelIndex.getAndIncrement();
+        return sNextModelId.getAndIncrement();
     }
 
     private final AtomicInteger mNextCollectionIndex;
@@ -45,38 +52,45 @@ public class Model
     private int getNextCollectionIndex()
     {
         int index = mNextCollectionIndex.getAndIncrement();
-        if (index >= MAX_COLLECTIONS)
+        if (index >= MAX_COLLECTIONS - RESERVED_COLLECTIONS)
             throw new RuntimeException("At the limit for the number of collections in model " + name + ". Cannot create more collections!");
         return index;
     }
 
-    private int mModelIndex;
-
-    public int getIndex()
+    private int mModelId;
+    public int getId()
     {
-        return mModelIndex;
+        return mModelId;
     }
-
     public String name;
     public String authority;
     public int version;
-    public ArrayList<Collection> collections;
 
-    synchronized public void addCollection(Collection collection)
+    private HashMap<Integer, Collection> mCollections;
+
+    public static int cid2mid(int cid)
     {
-        int index = getNextCollectionIndex();
-        collection.setModel(this, index);
-        collections.add(index, collection);
+        return cid / MAX_COLLECTIONS;
     }
 
-    synchronized public Collection getCollection(int index)
+    private static int cr8cid(int modelId, int collectionIndex)
     {
-        return collections.get(index);
+        return modelId * MAX_COLLECTIONS + collectionIndex;
+    }
+
+    public static Collection getCollection(int id)
+    {
+        return getModel(cid2mid(id)).mCollections.get(id);
+    }
+
+    public java.util.Collection<Collection> getCollections()
+    {
+        return mCollections.values();
     }
 
     synchronized public Collection getCollectionByName(String name)
     {
-        for (Collection collection : collections) {
+        for (Collection collection : mCollections.values()) {
             if (collection.name.equals(name))
                 return collection;
         }
@@ -85,17 +99,21 @@ public class Model
 
     public Model(String name, String authority, int version, Collection[] collections)
     {
-        mModelIndex = getNextModelIndex();
+        mModelId = getNextModelId();
         mNextCollectionIndex = new AtomicInteger(0);
         this.name = name;
         this.authority = authority;
         this.version = version;
-        this.collections = new ArrayList<Collection>();
-        for (Collection collection : collections)
-            addCollection(collection);
+        mCollections = new HashMap<Integer, Collection>();
+        for (Collection collection : collections) {
+            int index = getNextCollectionIndex();
+            int cid = cr8cid(mModelId, index);
+            collection.setModel(this, cid);
+            mCollections.put(cid, collection);
+        }
 
         synchronized (sLock) {
-            sModels.add(mModelIndex, this);
+            sModels.add(mModelId, this);
         }
     }
 }

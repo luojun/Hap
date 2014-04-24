@@ -14,6 +14,7 @@ import android.util.Log;
 
 import java.util.ArrayList;
 
+import ca.dragonflystudios.content.provider.UriMapper;
 import ca.dragonflystudios.content.service.processor.ContentsExtractor;
 import ca.dragonflystudios.content.service.processor.StreamParser;
 import ca.dragonflystudios.content.service.processor.json.JsonProcessor;
@@ -58,17 +59,12 @@ public class Service extends IntentService
         protected long ifModifiedSince;
     }
 
-    public static final String KEY_AUTHORITY = "dss_authority";
-    public static final String KEY_URI = "dss_uri";
-    public static final String KEY_STAMPS_URI = "dss_stamps_uri";
-    public static final String KEY_REQUST_URL = "dss_url";
-    public static final String KEY_ETAG = "dss_etag";
-    public static final String KEY_IF_MODIFIED_SINCE = "dss_ims";
-    public static final String KEY_MODEL_INDEX = "dss_model_index";
-    public static final String KEY_COLLECTION_INDEX = "dss_collection_index";
+    public static final String KEY_COLLECITON_ID = "dss_collection_id";
     public static final String KEY_SELECTION = "dss_selection";
     public static final String KEY_SELECTION_ARGS = "dss_selection_args";
     public static final String KEY_SORT_ORDER = "dss_sort_order";
+    public static final String KEY_ETAG = "dss_etag";
+    public static final String KEY_IF_MODIFIED_SINCE = "dss_ims";
 
     public Service()
     {
@@ -88,14 +84,17 @@ public class Service extends IntentService
         //      Rely on static methods? Is that incompatible with the spirit of ContentProvider?
         //      Probably not a bad idea, so long as those static methods/variables are read-only.
         final Bundle extras = intent.getExtras();
-        final String authority = extras.getString(KEY_AUTHORITY);
-        final Uri uri = Uri.parse(extras.getString(KEY_URI));
-        final Uri stampsUri = Uri.parse(extras.getString(KEY_STAMPS_URI));
-        final int collectionIndex = extras.getInt(KEY_COLLECTION_INDEX);
-        final String requestUrl = extras.getString(KEY_REQUST_URL);
+        final int collectionId = extras.getInt(KEY_COLLECITON_ID);
+        final String selection = extras.getString(KEY_SELECTION);
+        final String[] selectionArgs = extras.getStringArray(KEY_SELECTION_ARGS);
+        final String sortOrder = extras.getString(KEY_SORT_ORDER);
         final String eTag = extras.getString(KEY_ETAG);
-        final long imsDate = extras.getLong(KEY_IF_MODIFIED_SINCE);
-        final Request request = new Request(requestUrl, eTag, imsDate);
+        final long ifModifiedSince = extras.getLong(KEY_IF_MODIFIED_SINCE);
+        final String requestUrl = UriMapper.cid2url(collectionId, selection, selectionArgs, sortOrder);
+        final Uri uri = UriMapper.cid2uri(collectionId);
+        final Uri stampsUri = UriMapper.cid2suri(collectionId);
+
+        final Request request = new Request(requestUrl, eTag, ifModifiedSince);
         final Result result = HttpHelper.request(request, mParser);
         final ContentValues[] contents = mExtractor.extract(result.parsed, null, null, null);
 
@@ -104,22 +103,24 @@ public class Service extends IntentService
 
         if (contents.length > 0) {
 
-            // TAI: this deletes all old items ...
-            operations.add(ContentProviderOperation.newDelete(uri).build());
+            // WAIL: this deletes all old items ...
+            operations.add(ContentProviderOperation.newDelete(uri).withSelection(selection, selectionArgs).build());
 
             for (ContentValues cvs : contents)
                 operations.add(ContentProviderOperation.newInsert(uri).withValues(cvs).build());
 
+            // WAIL: the literal strings that are column names of the stamps table
             final ContentValues stamps = new ContentValues();
-            stamps.put(KEY_COLLECTION_INDEX, collectionIndex);
-            stamps.put(KEY_ETAG, eTag);
-            stamps.put(KEY_IF_MODIFIED_SINCE, imsDate);
+            stamps.put("collection_id", collectionId);
+            stamps.put("etag", result.eTag);
+            stamps.put("ifmodifiedsince", result.ifModifiedSince);
             operations.add(ContentProviderOperation.newUpdate(stampsUri).withValues(stamps).build());
 
             try {
-                ContentProviderResult[] results = cr.applyBatch(authority, operations);
+                ContentProviderResult[] results = cr.applyBatch(uri.getAuthority(), operations);
                 if (BuildConfig.DEBUG)
                     Log.d(getClass().getName(), results.toString());
+                getContentResolver().notifyChange(uri, null);
             } catch (RemoteException e) {
                 e.printStackTrace();
             } catch (OperationApplicationException e) {

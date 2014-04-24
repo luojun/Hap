@@ -2,7 +2,7 @@ package ca.dragonflystudios.content.model;
 
 import android.net.Uri;
 
-import ca.dragonflystudios.content.provider.UriManager;
+import ca.dragonflystudios.content.provider.UriMapper;
 import ca.dragonflystudios.content.service.processor.ContentPath;
 
 /**
@@ -14,7 +14,7 @@ public class Collection
     public static final String KEY_PRIMARY = "_id";
 
     private Model mModel;
-    private int mIndex;
+    private int mId;
     public String name;
     public String url;
     public ContentPath itemsPath;
@@ -27,9 +27,9 @@ public class Collection
         return mModel;
     }
 
-    public int getIndex()
+    public int getId()
     {
-        return mIndex;
+        return mId;
     }
 
     public Collection(String name, String[] itemFieldNames, String url, ContentPath itemsPath, ContentPath[] itemFieldPaths)
@@ -54,11 +54,11 @@ public class Collection
         return url;
     }
 
-    protected void setModel(Model model, int collectionIndex)
+    protected void setModel(Model model, int collectionId)
     {
         mModel = model;
-        mIndex = collectionIndex;
-        UriManager.registerCollection(model.authority, model.getIndex(), this.name, collectionIndex);
+        mId = collectionId;
+        UriMapper.registerCollection(model.authority, this.name, mId);
     }
 }
 

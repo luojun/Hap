@@ -29,16 +29,15 @@ public class Provider extends ContentProvider
     @Override
     public int delete(Uri uri, String selection, String[] selectionArgs)
     {
-        UriManager.MCD mcd = UriManager.resolve(uri);
+        UriMapper.MCD mcd = UriMapper.resolve(uri);
         int count = mcd.database.delete(mcd.collection.name, selection, selectionArgs);
-        // getContext().getContentResolver().notifyChange(uri, null);
         return count;
     }
 
     @Override
     public String getType(Uri uri)
     {
-        UriManager.MCD mcd = UriManager.resolve(uri);
+        UriMapper.MCD mcd = UriMapper.resolve(uri);
         return "vnd.android.cursor.dir/vnd." + mcd.model.authority;
     }
 
@@ -47,7 +46,7 @@ public class Provider extends ContentProvider
     {
         // TODO: check the correctness of this implementation!
 
-        UriManager.MCD mcd = UriManager.resolve(uri);
+        UriMapper.MCD mcd = UriMapper.resolve(uri);
 
         Cursor c = mcd.database.rawQuery("SELECT * FROM " + mcd.collection.name + " WHERE _id = '" + values.getAsString("_id") + "'", null);
         try {
@@ -72,7 +71,7 @@ public class Provider extends ContentProvider
     @Override
     public int bulkInsert(Uri uri, ContentValues[] values)
     {
-        UriManager.MCD mcd = UriManager.resolve(uri);
+        UriMapper.MCD mcd = UriMapper.resolve(uri);
         String tableName = mcd.collection.name;
         SQLiteDatabase db = mcd.database;
         boolean inserted = false;
@@ -106,7 +105,7 @@ public class Provider extends ContentProvider
 
         if (size > 1) {
             final Uri uri = operations.get(0).getUri();
-            UriManager.MCD mcd = UriManager.resolve(uri);
+            UriMapper.MCD mcd = UriMapper.resolve(uri);
             SQLiteDatabase db = mcd.database;
 
             db.beginTransaction();
@@ -132,7 +131,7 @@ public class Provider extends ContentProvider
             if (null == db)
                 return false;
             else
-                UriManager.registerDatabaseForModel(db, model);
+                UriMapper.registerDatabaseForModel(db, model);
         }
         return true;
     }
@@ -140,7 +139,7 @@ public class Provider extends ContentProvider
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder)
     {
-        final UriManager.MCD mcd = UriManager.resolve(uri);
+        final UriMapper.MCD mcd = UriMapper.resolve(uri);
 
         String tableName = mcd.collection.name;
         SQLiteQueryBuilder qBuilder = new SQLiteQueryBuilder();
@@ -156,20 +155,19 @@ public class Provider extends ContentProvider
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs)
     {
-        UriManager.MCD mcd = UriManager.resolve(uri);
+        UriMapper.MCD mcd = UriMapper.resolve(uri);
         int count = mcd.database.updateWithOnConflict(mcd.collection.name, values, selection, selectionArgs, SQLiteDatabase.CONFLICT_REPLACE);
         getContext().getContentResolver().notifyChange(uri, null);
 
         return count;
     }
 
-    private void requestSync(UriManager.MCD mcd, String selection, String[] selectionArgs, String sortOrder)
+    private void requestSync(UriMapper.MCD mcd, String selection, String[] selectionArgs, String sortOrder)
     {
+        // TODO; get etag and ims
         final Context context = getContext();
         final Intent intent = new Intent(context, Service.class);
-        intent.putExtra(Service.KEY_AUTHORITY, mcd.model.authority);
-        intent.putExtra(Service.KEY_MODEL_INDEX, mcd.model.getIndex());
-        intent.putExtra(Service.KEY_COLLECTION_INDEX, mcd.collection.getIndex());
+        intent.putExtra(Service.KEY_COLLECITON_ID, mcd.collection.getId());
         intent.putExtra(Service.KEY_SELECTION, selection);
         intent.putExtra(Service.KEY_SELECTION_ARGS, selectionArgs);
         intent.putExtra(Service.KEY_SORT_ORDER, sortOrder);

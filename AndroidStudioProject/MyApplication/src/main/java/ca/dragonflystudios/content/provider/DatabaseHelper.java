@@ -36,7 +36,7 @@ public class DatabaseHelper
         {
             db.execSQL(CREATE_CACHE_STAMPS_TABLE);
 
-            for (Collection collection : mModel.collections)
+            for (Collection collection : mModel.getCollections())
                 createTable(db, collection);
         }
 
@@ -44,7 +44,7 @@ public class DatabaseHelper
         public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion)
         {
             db.execSQL("DROP TABLE IF EXISTS _cache_stamps_");
-            for (Collection collection : mModel.collections)
+            for (Collection collection : mModel.getCollections())
                 dropTable(db, collection);
 
             onCreate(db);
@@ -63,7 +63,7 @@ public class DatabaseHelper
 
         // initialize the entry for the collection
         database.execSQL(new StringBuilder("INSERT INTO _cache_stamps_ (collection_id, etag, ifmodifiedsince) values(")
-                .append(collection.getIndex()).append(", ")
+                .append(collection.getId()).append(", ")
                 .append("''").append(", ")
                 .append(0L).append(");")
                 .toString());
