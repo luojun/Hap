@@ -59,14 +59,6 @@ public class NprNavigator implements Pilotable
         Collection collection = Model.getModelByAuthority("api.npr.org").getCollectionByName("programs");
         mProgramsBinder = new ListBinder(loaderManager, context, mProgramsEndu, collection, null, null, null);
         mCurrentProgramBinder = null;
-
-                        /*
-                String program_id = mProgramsCursor.getString(mProgramsCursor.getColumnIndex("id"));
-                collection = DsContentProvider.Model.getModelByAuthority("api.npr.org").getCollectionByName("program_items");
-                collection.requestSync(mContext, "program_id = ?", new String[] { program_id }, null);
-                return new CursorLoader(mContext, collection.getUri(), collection.columnNames, "program_id = " + program_id, null, null);
-                 */
-
     }
 
     public class Mp4
