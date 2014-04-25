@@ -1,4 +1,4 @@
-package ca.dragonflystudios.content.service.processor;
+package ca.dragonflystudios.content.processor;
 
 import java.io.InputStream;
 

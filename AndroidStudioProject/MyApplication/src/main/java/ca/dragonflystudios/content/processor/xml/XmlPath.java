@@ -1,6 +1,6 @@
-package ca.dragonflystudios.content.service.processor.xml;
+package ca.dragonflystudios.content.processor.xml;
 
-import ca.dragonflystudios.content.service.processor.ContentPath;
+import ca.dragonflystudios.content.processor.ContentPath;
 
 /**
  * Created by jun on 2014-04-19.

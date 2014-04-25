@@ -1,4 +1,4 @@
-package ca.dragonflystudios.content.service.processor;
+package ca.dragonflystudios.content.processor;
 
 /**
  * Created by jun on 2014-04-18.

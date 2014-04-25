@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import ca.dragonflystudios.content.service.processor.StreamParser;
+import ca.dragonflystudios.content.processor.StreamParser;
 import ca.dragonflystudios.hap.BuildConfig;
 
 // NOTE: consider Android's HttpResponseCache: http://developer.android.com/reference/android/net/http/HttpResponseCache.html

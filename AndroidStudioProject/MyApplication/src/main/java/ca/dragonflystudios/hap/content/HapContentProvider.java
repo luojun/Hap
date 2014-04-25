@@ -3,7 +3,7 @@ package ca.dragonflystudios.hap.content;
 import ca.dragonflystudios.content.model.Collection;
 import ca.dragonflystudios.content.model.Model;
 import ca.dragonflystudios.content.provider.Provider;
-import ca.dragonflystudios.content.service.processor.json.JsonPath;
+import ca.dragonflystudios.content.processor.json.JsonPath;
 
 /**
  * Created by jun on 2014-04-19.

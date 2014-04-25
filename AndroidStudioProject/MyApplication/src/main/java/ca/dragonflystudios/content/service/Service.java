@@ -15,9 +15,9 @@ import android.util.Log;
 import java.util.ArrayList;
 
 import ca.dragonflystudios.content.provider.UriMapper;
-import ca.dragonflystudios.content.service.processor.ContentsExtractor;
-import ca.dragonflystudios.content.service.processor.StreamParser;
-import ca.dragonflystudios.content.service.processor.json.JsonProcessor;
+import ca.dragonflystudios.content.processor.ContentsExtractor;
+import ca.dragonflystudios.content.processor.StreamParser;
+import ca.dragonflystudios.content.processor.json.JsonProcessor;
 import ca.dragonflystudios.hap.BuildConfig;
 
 /**
@@ -83,7 +83,7 @@ public class Service extends IntentService
 
         final Request request = new Request(requestUrl);
         final Result result = HttpHelper.request(request, mParser);
-        final ContentValues[] contents = mExtractor.extract(result.parsed, null, null, null);
+        final ContentValues[] contents = mExtractor.extract(result.parsed, collectionId);
 
         final ContentResolver cr = getContentResolver();
         final ArrayList<ContentProviderOperation> operations = new ArrayList<ContentProviderOperation>();

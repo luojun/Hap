@@ -1,9 +1,9 @@
-package ca.dragonflystudios.content.service.processor.json;
+package ca.dragonflystudios.content.processor.json;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
 
-import ca.dragonflystudios.content.service.processor.ContentPath;
+import ca.dragonflystudios.content.processor.ContentPath;
 
 /**
  * Created by jun on 2014-04-18.

@@ -1,4 +1,4 @@
-package ca.dragonflystudios.content.service.processor;
+package ca.dragonflystudios.content.processor;
 
 import android.content.ContentValues;
 
@@ -17,5 +17,5 @@ public interface ContentsExtractor
      * @param itemFieldNames names of the fields of an item, in one-to-one correspondence with @param itemFieldPaths
      * @return extracted content items
      */
-    public ContentValues[] extract(Object base, ContentPath itemsPath, ContentPath[] itemFieldPaths, String[] itemFieldNames);
+    public ContentValues[] extract(Object base, int collectionId);
 }

@@ -1,12 +1,11 @@
-package ca.dragonflystudios.content.service.processor.xml;
+package ca.dragonflystudios.content.processor.xml;
 
 import android.content.ContentValues;
 
 import java.io.InputStream;
 
-import ca.dragonflystudios.content.service.processor.ContentPath;
-import ca.dragonflystudios.content.service.processor.ContentsExtractor;
-import ca.dragonflystudios.content.service.processor.StreamParser;
+import ca.dragonflystudios.content.processor.ContentsExtractor;
+import ca.dragonflystudios.content.processor.StreamParser;
 
 /**
  * Created by jun on 2014-04-19.
@@ -24,7 +23,7 @@ public class XmlProcessor implements StreamParser, ContentsExtractor
     }
 
     @Override
-    public ContentValues[] extract(Object base, ContentPath itemsPath, ContentPath[] itemFieldPaths, String[] itemFieldNames)
+    public ContentValues[] extract(Object base, int collectionId)
     {
         return null;
     }
