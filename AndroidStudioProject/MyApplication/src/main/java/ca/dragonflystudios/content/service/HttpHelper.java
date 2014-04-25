@@ -25,7 +25,7 @@ public class HttpHelper
     {
 
         HttpURLConnection connection = null;
-        final Service.Result result = new Service.Result(0, null, null, 0);
+        final Service.Result result = new Service.Result(0, null);
 
         try {
             final URL url = new URL(request.url);
@@ -36,25 +36,16 @@ public class HttpHelper
 
             // TODO: switch(request.method)
             connection.setRequestMethod("GET");
-
-            connection.setIfModifiedSince(request.ifModifiedSince);
             connection.setDoInput(true);
 
             result.responseCode = connection.getResponseCode();
             switch (result.responseCode) {
                 case HttpStatus.SC_OK:
-                    String newTag = connection.getHeaderField("ETag");
-                    if (null == request.eTag || null == newTag || !request.equals(newTag)) {
-                        result.parsed = parser.parse(connection.getInputStream());
-                    }
-                    result.ifModifiedSince = connection.getIfModifiedSince();
-                    result.eTag = newTag;
+                    result.parsed = parser.parse(connection.getInputStream());
                     break;
                 case HttpStatus.SC_NOT_MODIFIED:
                     if (BuildConfig.DEBUG)
                         Log.d(HttpHelper.class.getName(), "Not modified: " + url);
-                    result.ifModifiedSince = connection.getIfModifiedSince();
-                    result.eTag = connection.getHeaderField("ETag");
                     break;
                 default:
                     if (BuildConfig.DEBUG)
@@ -71,5 +62,4 @@ public class HttpHelper
 
         return result;
     }
-
 }

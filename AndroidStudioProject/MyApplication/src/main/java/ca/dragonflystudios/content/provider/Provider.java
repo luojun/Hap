@@ -167,7 +167,7 @@ public class Provider extends ContentProvider
         // TODO; get etag and ims
         final Context context = getContext();
         final Intent intent = new Intent(context, Service.class);
-        intent.putExtra(Service.KEY_COLLECITON_ID, mcd.collection.getId());
+        intent.putExtra(Service.KEY_COLLECTION_ID, mcd.collection.getId());
         intent.putExtra(Service.KEY_SELECTION, selection);
         intent.putExtra(Service.KEY_SELECTION_ARGS, selectionArgs);
         intent.putExtra(Service.KEY_SORT_ORDER, sortOrder);

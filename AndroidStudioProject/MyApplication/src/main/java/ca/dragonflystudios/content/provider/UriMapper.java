@@ -66,10 +66,4 @@ public class UriMapper
     {
         return Model.getCollection(collectionId).getUri();
     }
-
-    public static Uri cid2suri(int collectionId)
-    {
-        // TODO: figure this one out ...
-        return null;
-    }
 }
