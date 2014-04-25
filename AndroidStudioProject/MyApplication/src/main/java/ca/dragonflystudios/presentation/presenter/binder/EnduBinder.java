@@ -1,4 +1,4 @@
-package ca.dragonflystudios.binder;
+package ca.dragonflystudios.presentation.presenter.binder;
 
 import android.app.LoaderManager;
 import android.content.Context;
@@ -7,7 +7,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
 
-import ca.dragonflystudios.endu.Endu;
+import ca.dragonflystudios.presentation.presenter.endu.Endu;
 import ca.dragonflystudios.content.model.Collection;
 
 /**
@@ -22,7 +22,6 @@ public class EnduBinder implements LoaderManager.LoaderCallbacks<Cursor>
     }
 
     // TODO: refactor the Endu stuff into something like a "Presenter" interface.
-    // TODO: refactor the Collection stuff into something like a "Content"/"Model" interface.
 
     private static int sLoaderId = 1024;
     private static Object sLock = new Object();

@@ -1,10 +1,10 @@
-package ca.dragonflystudios.endu;
+package ca.dragonflystudios.presentation.presenter.endu;
 
 import android.database.Cursor;
 
 import java.util.ArrayList;
 
-import ca.dragonflystudios.Player.ContentPlayer;
+import ca.dragonflystudios.presentation.player.Playable;
 
 /**
  * Created by Jun Luo on 13-12-02.
@@ -12,13 +12,13 @@ import ca.dragonflystudios.Player.ContentPlayer;
 
 public class ListEndu extends Endu
 {
-    public ListEndu(ContentPlayer enduPlayer, ContentPlayer listItemPlayer)
+    public ListEndu(Playable enduPlayer, Playable listItemPlayer)
     {
         super(enduPlayer);
         mListItemPlayer = listItemPlayer;
     }
 
-    ContentPlayer mListItemPlayer;
+    Playable mListItemPlayer;
     ArrayList<Endu> mEndus;
 
     private Cursor mCursor;

@@ -1,4 +1,4 @@
-package ca.dragonflystudios.hap;
+package ca.dragonflystudios.haptic;
 
 import android.content.Context;
 import android.graphics.Bitmap;

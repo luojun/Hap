@@ -14,6 +14,10 @@ import android.util.Log;
 
 import java.util.Locale;
 
+import ca.dragonflystudios.haptic.AcceGyro;
+import ca.dragonflystudios.haptic.AcceGyroGraphView;
+import ca.dragonflystudios.haptic.GyroGestureRecognizer;
+
 public class HapActivity extends Activity implements TextToSpeech.OnInitListener
 {
     private static final boolean LOG = false;

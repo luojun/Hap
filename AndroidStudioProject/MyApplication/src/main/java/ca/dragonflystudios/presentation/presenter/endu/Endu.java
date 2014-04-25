@@ -1,9 +1,8 @@
-package ca.dragonflystudios.endu;
+package ca.dragonflystudios.presentation.presenter.endu;
 
 import android.database.Cursor;
 
-import ca.dragonflystudios.Player.ContentPlayer;
-import ca.dragonflystudios.hap.Pilotable;
+import ca.dragonflystudios.presentation.player.Playable;
 
 /**
  * Created by Jun Luo on 13-12-02.
@@ -18,19 +17,19 @@ import ca.dragonflystudios.hap.Pilotable;
 
 // TODO: Tap into the onDraw callbacks of view for framed refreshing? TAI!
 
-public class Endu implements Pilotable
+public class Endu
 {
     private Cursor mCursor;
     private int mPosition;
 
-    private ContentPlayer mContentPlayer;
+    private Playable mContentPlayer;
 
-    public Endu(ContentPlayer player)
+    public Endu(Playable player)
     {
         mContentPlayer = player;
     }
 
-    public Endu(ContentPlayer player, Cursor cursor, int position)
+    public Endu(Playable player, Cursor cursor, int position)
     {
         mContentPlayer = player;
         mCursor = cursor;
@@ -46,7 +45,7 @@ public class Endu implements Pilotable
         if (savedPosition != mPosition)
             mCursor.moveToPosition(mPosition);
 
-        mContentPlayer.playContent(mCursor);
+//        mContentPlayer.playContent(mCursor);
 
         if (savedPosition != mPosition)
             mCursor.moveToPosition(savedPosition);
@@ -60,37 +59,31 @@ public class Endu implements Pilotable
         mPosition = position;
     }
 
-    @Override
     public boolean up()
     {
         return false;
     }
 
-    @Override
     public boolean down()
     {
         return onPlay();
     }
 
-    @Override
     public boolean next()
     {
         return false;
     }
 
-    @Override
     public boolean previous()
     {
         return false;
     }
 
-    @Override
     public Object getContent()
     {
         return null;
     }
 
-    @Override
     public String getContentDescription()
     {
         return null;

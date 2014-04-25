@@ -9,6 +9,8 @@ import android.os.Bundle;
 import android.util.Log;
 
 import ca.dragonflystudios.content.model.*;
+import ca.dragonflystudios.ui.Pilotable;
+import ca.dragonflystudios.navigation.Pilotable;
 
 public class PilotableContent implements Pilotable, LoaderManager.LoaderCallbacks<Cursor>
 {

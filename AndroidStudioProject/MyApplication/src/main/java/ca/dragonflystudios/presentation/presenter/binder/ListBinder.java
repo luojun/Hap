@@ -1,11 +1,11 @@
-package ca.dragonflystudios.binder;
+package ca.dragonflystudios.presentation.presenter.binder;
 
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.Loader;
 import android.database.Cursor;
 
-import ca.dragonflystudios.endu.ListEndu;
+import ca.dragonflystudios.presentation.presenter.endu.ListEndu;
 import ca.dragonflystudios.content.model.Collection;
 
 /**

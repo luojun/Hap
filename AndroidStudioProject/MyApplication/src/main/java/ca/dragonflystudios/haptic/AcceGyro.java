@@ -1,4 +1,4 @@
-package ca.dragonflystudios.hap;
+package ca.dragonflystudios.haptic;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;

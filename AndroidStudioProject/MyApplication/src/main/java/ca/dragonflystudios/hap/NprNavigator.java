@@ -4,11 +4,14 @@ import android.app.LoaderManager;
 import android.content.Context;
 import android.database.Cursor;
 
-import ca.dragonflystudios.Player.ContentPlayer;
-import ca.dragonflystudios.binder.ListBinder;
+import ca.dragonflystudios.ui.Pilotable;
+import ca.dragonflystudios.ui.Playable;
+import ca.dragonflystudios.presentation.presenter.binder.ListBinder;
 import ca.dragonflystudios.content.model.Collection;
 import ca.dragonflystudios.content.model.Model;
-import ca.dragonflystudios.endu.ListEndu;
+import ca.dragonflystudios.presentation.presenter.endu.ListEndu;
+import ca.dragonflystudios.navigation.Pilotable;
+import ca.dragonflystudios.presentation.player.Playable;
 
 /**
  * Created by Jun Luo on 13-12-04.
@@ -18,15 +21,10 @@ public class NprNavigator implements Pilotable
 {
     // TODO: tracks history; allow going "home" etc.
 
-    private final static String NPR_AUTHORITY = "api.npr.org";
-
     private static enum Level
     {
         CATEGORY_LIST, ITEM_LIST, ITEM
     }
-
-    private final static String COLLECTION_NAME_PROGRAMS = "programs";
-    private final static String COLLECTION_NAME_PROGRAM_ITEMS = "program_items";
 
     private Level mCurrentLevel;
     private Context mContext;
@@ -40,14 +38,14 @@ public class NprNavigator implements Pilotable
         mCurrentLevel = Level.CATEGORY_LIST;
         mContext = context;
 
-        mProgramsEndu = new ListEndu(new ContentPlayer()
+        mProgramsEndu = new ListEndu(new Playable()
         {
             @Override
             public void playContent(Cursor cursor)
             {
                 // play NPR overview
             }
-        }, new ContentPlayer()
+        }, new Playable()
         {
             @Override
             public void playContent(Cursor cursor)
@@ -82,6 +80,16 @@ public class NprNavigator implements Pilotable
     @Override
     public boolean down()
     {
+        switch (mCurrentLevel) {
+            case CATEGORY_LIST:
+                mCurrentLevel = Level.ITEM_LIST;
+                return true;
+            case ITEM_LIST:
+                mCurrentLevel = Level.ITEM;
+                return true;
+            case ITEM:
+                return false;
+        }
         return false;
     }
 
