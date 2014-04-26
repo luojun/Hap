@@ -1,9 +1,16 @@
 package ca.dragonflystudios.navigation;
 
-public interface Pilotable
+/**
+ *
+ * User's egocentric state and possible actions. The metaphor here is an airplane. What is pilotable is the
+ * airplane. This corresponds to the localization part.
+ *
+ */
+
+public class Pilotable
 {
-    public Pilotable up();
-    public Pilotable down();
-    public Pilotable next();
-    public Pilotable previous();
+    public enum Maneuver
+    {
+        FORWARD, BACKWARD, LEFT, RIGHT, UP, DOWN;
+    }
 }

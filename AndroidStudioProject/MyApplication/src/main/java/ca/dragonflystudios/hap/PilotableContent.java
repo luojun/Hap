@@ -8,11 +8,10 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.util.Log;
 
-import ca.dragonflystudios.content.model.*;
-import ca.dragonflystudios.ui.Pilotable;
-import ca.dragonflystudios.navigation.Pilotable;
+import ca.dragonflystudios.content.model.Collection;
+import ca.dragonflystudios.content.model.Model;
 
-public class PilotableContent implements Pilotable, LoaderManager.LoaderCallbacks<Cursor>
+public class PilotableContent implements LoaderManager.LoaderCallbacks<Cursor>
 {
     private final static String NPR_AUTHORITY = "api.npr.org";
     private final static String COLLECTION_NAME_PROGRAMS = "programs";
@@ -126,7 +125,6 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
         }
     }
 
-    @Override
     public Object getContent()
     {
         switch (mCurrentLevel) {
@@ -149,7 +147,6 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
         return null;
     }
 
-    @Override
     public String getContentDescription()
     {
         switch (mCurrentLevel) {
@@ -169,7 +166,6 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
         return null;
     }
 
-    @Override
     public boolean up()
     {
         switch (mCurrentLevel) {
@@ -185,7 +181,6 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
         return false;
     }
 
-    @Override
     public boolean down()
     {
         switch (mCurrentLevel) {
@@ -209,7 +204,6 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
         return false;
     }
 
-    @Override
     public boolean next()
     {
         switch (mCurrentLevel) {
@@ -223,7 +217,6 @@ public class PilotableContent implements Pilotable, LoaderManager.LoaderCallback
         return false;
     }
 
-    @Override
     public boolean previous()
     {
         switch (mCurrentLevel) {

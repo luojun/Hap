@@ -2,22 +2,17 @@ package ca.dragonflystudios.hap;
 
 import android.app.LoaderManager;
 import android.content.Context;
-import android.database.Cursor;
 
-import ca.dragonflystudios.ui.Pilotable;
-import ca.dragonflystudios.ui.Playable;
-import ca.dragonflystudios.presentation.presenter.binder.ListBinder;
 import ca.dragonflystudios.content.model.Collection;
 import ca.dragonflystudios.content.model.Model;
+import ca.dragonflystudios.presentation.presenter.binder.ListBinder;
 import ca.dragonflystudios.presentation.presenter.endu.ListEndu;
-import ca.dragonflystudios.navigation.Pilotable;
-import ca.dragonflystudios.presentation.player.Playable;
 
 /**
  * Created by Jun Luo on 13-12-04.
  */
 
-public class NprNavigator implements Pilotable
+public class NprNavigator
 {
     // TODO: tracks history; allow going "home" etc.
 
@@ -37,7 +32,7 @@ public class NprNavigator implements Pilotable
     {
         mCurrentLevel = Level.CATEGORY_LIST;
         mContext = context;
-
+/*
         mProgramsEndu = new ListEndu(new Playable()
         {
             @Override
@@ -53,7 +48,7 @@ public class NprNavigator implements Pilotable
                 // play program overview
             }
         });
-
+*/
         Collection collection = Model.getModelByAuthority("api.npr.org").getCollectionByName("programs");
         mProgramsBinder = new ListBinder(loaderManager, context, mProgramsEndu, collection, null, null, null);
         mCurrentProgramBinder = null;
@@ -71,13 +66,11 @@ public class NprNavigator implements Pilotable
         }
     }
 
-    @Override
     public boolean up()
     {
         return false;
     }
 
-    @Override
     public boolean down()
     {
         switch (mCurrentLevel) {
@@ -93,25 +86,21 @@ public class NprNavigator implements Pilotable
         return false;
     }
 
-    @Override
     public boolean next()
     {
         return false;
     }
 
-    @Override
     public boolean previous()
     {
         return false;
     }
 
-    @Override
     public Object getContent()
     {
         return null;
     }
 
-    @Override
     public String getContentDescription()
     {
         return null;
