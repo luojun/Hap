@@ -4,31 +4,75 @@ import java.util.Stack;
 
 /**
  *
- * Navigation management. Links navigable with pilotable. Maps piloting maneuvers to navigation
+ * Navigation management. Coordinate navigable with pilotable. Maps piloting maneuvers to navigation
  * moves. Update navigation state ("where am i?"). Record history.
  *
  */
 
 public class Navigator
 {
+    public Navigator()
+    {
+        mUnwindStack = new Stack<Navigable>();
+        mRewindStack = new Stack<Navigable>();
+    }
+
+    public enum NavigatorMove
+    {
+        NONE, REWIND, UNWIND;
+
+        public boolean move(Navigator navigator)
+        {
+            switch (this)
+            {
+                case REWIND :
+                    return navigator.rewind();
+                case UNWIND :
+                    return navigator.unwind();
+                default :
+                    return false;
+            }
+        }
+
+        public static NavigatorMove map(Pilotable.Maneuver maneuver)
+        {
+            switch (maneuver) {
+                case FORWARD :
+                    return UNWIND;
+                case BACKWARD :
+                    return REWIND;
+                default :
+                    return NONE;
+            }
+        }
+    }
+
     public boolean navigate(Pilotable.Maneuver maneuver)
     {
-        OrderedTreeNavigable.OrderedTreeMove move = map(maneuver);
-        if (null == move)
-            return false;
+        NavigatorMove navigatorMove = NavigatorMove.map(maneuver);
+        if (NavigatorMove.NONE != navigatorMove) {
+            return navigatorMove.move(this);
+        } else {
+            OrderedTreeNavigable.OrderedTreeMove move = map(maneuver);
+            if (null == move)
+                return false;
 
-        Navigable navigable = move.apply(mCurrentNavigable);
-        if (null == navigable)
-            return false;
+            Navigable navigable = move.apply(mCurrentNavigable);
+            if (null == navigable)
+                return false;
 
-        // WAIL: thread safety
-        mRewindStack.push(mCurrentNavigable);
-        mCurrentNavigable = navigable;
-        mUnwindStack.clear();
-
+            // WAIL: thread safety
+            mRewindStack.push(mCurrentNavigable);
+            mCurrentNavigable = navigable;
+            mUnwindStack.clear();
+        }
         return true;
     }
 
+    /**
+     * Like undo
+     * @return
+     */
     public boolean rewind()
     {
         if (!mRewindStack.empty()) {
@@ -39,6 +83,10 @@ public class Navigator
         return false;
     }
 
+    /**
+     * Like redo
+     * @return
+     */
     public boolean unwind()
     {
         if (!mUnwindStack.empty()) {
@@ -49,26 +97,21 @@ public class Navigator
         return false;
     }
 
-    private OrderedTreeNavigable.OrderedTreeMove map(Pilotable.Maneuver maneuver)
+    private static OrderedTreeNavigable.OrderedTreeMove map(Pilotable.Maneuver maneuver)
     {
         switch (maneuver)
         {
-            case FORWARD :
-
-                break;
-            case BACKWARD :
-                break;
             case LEFT :
-                break;
+                return OrderedTreeNavigable.OrderedTreeMove.GOTO_PREVIOUS_SIBLING;
             case RIGHT :
-                break;
+                return OrderedTreeNavigable.OrderedTreeMove.GOTO_NEXT_SIBLING;
             case UP :
-                break;
+                return OrderedTreeNavigable.OrderedTreeMove.GOTO_PARENT;
             case DOWN :
-                break;
+                return OrderedTreeNavigable.OrderedTreeMove.GOTO_CHILD;
+            default :
+                return null;
         }
-
-        return null;
     }
 
     private Stack<Navigable> mRewindStack;
