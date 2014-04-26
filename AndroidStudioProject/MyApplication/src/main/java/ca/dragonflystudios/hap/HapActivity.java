@@ -29,12 +29,12 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
     private NprNavigator mContent;
     private TextToSpeech mTts;
 
-    // TODO: refactor the following and PilotableContent in terms of MEC -- Model Endu Controller
+    // TODO: refactor the following and NavigableContent in terms of MEC -- Model Endu Controller
     // Endu <=> View; Windah <=> Window (ah is beginning of German Ahre; Endu is part of French entendu, like how "view" originated from French "seen".
 
     private BroadcastReceiver mReceiver = new BroadcastReceiver()
     {
-        private void playMp4(PilotableContent.Mp4 mp4)
+        private void playMp4(NavigableContent.Mp4 mp4)
         {
             // mTts.speak(mp4.teaser, TextToSpeech.QUEUE_FLUSH, null);
             Uri uri = Uri.parse(mp4.url);
@@ -63,8 +63,8 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
                             mTts.speak((String) mContent.getContent(), TextToSpeech.QUEUE_ADD, null);
                         } else if (content instanceof String) {
                             mTts.speak((String) content, TextToSpeech.QUEUE_FLUSH, null);
-                        } else if (content instanceof PilotableContent.Mp4) {
-                            playMp4((PilotableContent.Mp4) content);
+                        } else if (content instanceof NavigableContent.Mp4) {
+                            playMp4((NavigableContent.Mp4) content);
                         }
                     } else
                         mTts.speak("Sorry. Cannot go down anymore.", TextToSpeech.QUEUE_FLUSH, null);
@@ -74,8 +74,8 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
                         Object content = mContent.getContent();
                         if (content instanceof String) {
                             mTts.speak((String) content, TextToSpeech.QUEUE_FLUSH, null);
-                        } else if (content instanceof PilotableContent.Mp4) {
-                            playMp4((PilotableContent.Mp4) content);
+                        } else if (content instanceof NavigableContent.Mp4) {
+                            playMp4((NavigableContent.Mp4) content);
                         }
                     } else
                         mTts.speak("Sorry. No more before this one.", TextToSpeech.QUEUE_FLUSH, null);
@@ -85,8 +85,8 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
                         Object content = mContent.getContent();
                         if (content instanceof String) {
                             mTts.speak((String) content, TextToSpeech.QUEUE_FLUSH, null);
-                        } else if (content instanceof PilotableContent.Mp4) {
-                            playMp4((PilotableContent.Mp4) content);
+                        } else if (content instanceof NavigableContent.Mp4) {
+                            playMp4((NavigableContent.Mp4) content);
                         }
                     } else
                         mTts.speak("Sorry. No more after this one.", TextToSpeech.QUEUE_FLUSH, null);
