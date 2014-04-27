@@ -10,19 +10,17 @@ import android.util.Log;
 
 import ca.dragonflystudios.content.model.Collection;
 import ca.dragonflystudios.content.model.Model;
+import ca.dragonflystudios.hap.content.C;
 
-public class PilotableContent implements LoaderManager.LoaderCallbacks<Cursor>
+public class NavigableContent implements LoaderManager.LoaderCallbacks<Cursor>
 {
-    private final static String NPR_AUTHORITY = "api.npr.org";
-    private final static String COLLECTION_NAME_PROGRAMS = "programs";
-    private final static String COLLECTION_NAME_PROGRAM_ITEMS = "program_items";
     private final static int PROGRAMS_LOADER_ID = 1;
     private final static int PROGRAM_ITEMS_LOADER_ID = 2;
 
-    public PilotableContent(Context context, LoaderManager loaderManager)
+    public NavigableContent(Context context, LoaderManager loaderManager)
     {
-        mCurrentLevel = Level.CATEGORY_LIST;
         mContext = context;
+        mCurrentLevel = Level.CATEGORY_LIST;
         mLoaderManager = loaderManager;
         mLoaderManager.initLoader(PROGRAMS_LOADER_ID, null, this);
     }
@@ -57,12 +55,12 @@ public class PilotableContent implements LoaderManager.LoaderCallbacks<Cursor>
     {
         switch (i) {
             case PROGRAMS_LOADER_ID:
-                Collection collection = Model.getModelByAuthority("api.npr.org").getCollectionByName("programs");
+                Collection collection = Model.getModelByAuthority(C.NPR_AUTHORITY).getCollectionByName(C.COLLECTION_NAME_PROGRAMS);
                 return new CursorLoader(mContext, collection.getUri(), collection.itemFieldNames, null, null, null);
             case PROGRAM_ITEMS_LOADER_ID:
-                String program_id = mProgramsCursor.getString(mProgramsCursor.getColumnIndex("id"));
-                collection = Model.getModelByAuthority("api.npr.org").getCollectionByName("program_items");
-                return new CursorLoader(mContext, collection.getUri(), collection.itemFieldNames, "program_id = " + program_id, null, null);
+                String program_id = mProgramsCursor.getString(mProgramsCursor.getColumnIndex(C.field.id));
+                collection = Model.getModelByAuthority(C.NPR_AUTHORITY).getCollectionByName(C.COLLECTION_NAME_STORIES);
+                return new CursorLoader(mContext, collection.getUri(), collection.itemFieldNames, C.field.program_id + " = " + program_id, null, null);
             default:
                 throw new RuntimeException("Invalid loader id: " + i);
         }
@@ -106,13 +104,6 @@ public class PilotableContent implements LoaderManager.LoaderCallbacks<Cursor>
         }
     }
 
-    private enum Level
-    {
-        CATEGORY_LIST, ITEM_LIST, ITEM
-    }
-
-    private Level mCurrentLevel;
-
     public class Mp4
     {
         public String teaser;
@@ -125,22 +116,29 @@ public class PilotableContent implements LoaderManager.LoaderCallbacks<Cursor>
         }
     }
 
+    private enum Level
+    {
+        CATEGORY_LIST, ITEM_LIST, ITEM
+    }
+
+    private Level mCurrentLevel;
+
     public Object getContent()
     {
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
                 if (null != mProgramsCursor && mProgramsCursor.getCount() > 0)
-                    return mProgramsCursor.getString(mProgramsCursor.getColumnIndex("title")) + ". " + mProgramsCursor.getString(mProgramsCursor.getColumnIndex("description"));
+                    return mProgramsCursor.getString(mProgramsCursor.getColumnIndex(C.field.title)) + ". " + mProgramsCursor.getString(mProgramsCursor.getColumnIndex(C.field.description));
                 else
                     return null;
             case ITEM_LIST:
                 if (null != mCurrentProgramCursor && mCurrentProgramCursor.getCount() > 0)
-                    return mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex("title"));
+                    return mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex(C.field.title));
                 else
                     return null;
             case ITEM:
                 if (null != mCurrentProgramCursor && mCurrentProgramCursor.getCount() > 0) {
-                    return new Mp4(mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex("teaser")), mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex("mp4")));
+                    return new Mp4(mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex(C.field.teaser)), mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex(C.field.mp4)));
                 } else
                     return null;
         }
@@ -152,12 +150,12 @@ public class PilotableContent implements LoaderManager.LoaderCallbacks<Cursor>
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
                 if (null != mProgramsCursor && mProgramsCursor.getCount() > 0)
-                    return "Programs. The current program is " + mProgramsCursor.getString(mProgramsCursor.getColumnIndex("title")) + ".";
+                    return "Programs. The current program is " + mProgramsCursor.getString(mProgramsCursor.getColumnIndex(C.field.title)) + ".";
                 else
                     return null;
             case ITEM_LIST:
                 if (null != mProgramsCursor && mProgramsCursor.getCount() > 0 && null != mCurrentProgramCursor && mCurrentProgramCursor.getCount() > 0)
-                    return "Stories in " + mProgramsCursor.getString(mProgramsCursor.getColumnIndex("title")) + ". Current story: " + mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex("title")) + ".";
+                    return "Stories in " + mProgramsCursor.getString(mProgramsCursor.getColumnIndex(C.field.title)) + ". Current story: " + mCurrentProgramCursor.getString(mCurrentProgramCursor.getColumnIndex(C.field.title)) + ".";
                 else
                     return null;
             case ITEM:
@@ -166,7 +164,7 @@ public class PilotableContent implements LoaderManager.LoaderCallbacks<Cursor>
         return null;
     }
 
-    public boolean up()
+    public boolean gotoParent()
     {
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
@@ -181,14 +179,14 @@ public class PilotableContent implements LoaderManager.LoaderCallbacks<Cursor>
         return false;
     }
 
-    public boolean down()
+    public boolean gotoChild()
     {
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
                 mCurrentLevel = Level.ITEM_LIST;
                 if (null != mProgramsCursor && mProgramsCursor.getCount() > 0) {
                     mCurrentProgramCursor = null;
-                    mLoaderManager.restartLoader(PROGRAM_ITEMS_LOADER_ID, null, this);
+                    mLoaderManager.restartLoader(PROGRAM_ITEMS_LOADER_ID, null, NavigableContent.this);
                     return true;
                 } else {
                     return false;
@@ -204,20 +202,7 @@ public class PilotableContent implements LoaderManager.LoaderCallbacks<Cursor>
         return false;
     }
 
-    public boolean next()
-    {
-        switch (mCurrentLevel) {
-            case CATEGORY_LIST:
-                return shiftCursor(mProgramsCursor, 1);
-            case ITEM_LIST:
-                return shiftCursor(mCurrentProgramCursor, 1);
-            case ITEM:
-                return shiftCursor(mCurrentProgramCursor, 1);
-        }
-        return false;
-    }
-
-    public boolean previous()
+    public boolean gotoPreviousSibling()
     {
         switch (mCurrentLevel) {
             case CATEGORY_LIST:
@@ -226,6 +211,19 @@ public class PilotableContent implements LoaderManager.LoaderCallbacks<Cursor>
                 return shiftCursor(mCurrentProgramCursor, -1);
             case ITEM:
                 return shiftCursor(mCurrentProgramCursor, -1);
+        }
+        return false;
+    }
+
+    public boolean gotoNextSibling()
+    {
+        switch (mCurrentLevel) {
+            case CATEGORY_LIST:
+                return shiftCursor(mProgramsCursor, 1);
+            case ITEM_LIST:
+                return shiftCursor(mCurrentProgramCursor, 1);
+            case ITEM:
+                return shiftCursor(mCurrentProgramCursor, 1);
         }
         return false;
     }

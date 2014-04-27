@@ -100,7 +100,6 @@ public class Service extends IntentService
                 ContentProviderResult[] results = cr.applyBatch(uri.getAuthority(), operations);
                 if (BuildConfig.DEBUG)
                     Log.d(getClass().getName(), results.toString());
-                getContentResolver().notifyChange(uri, null);
             } catch (RemoteException e) {
                 e.printStackTrace();
             } catch (OperationApplicationException e) {

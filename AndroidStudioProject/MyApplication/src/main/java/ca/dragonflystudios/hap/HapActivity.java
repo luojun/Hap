@@ -26,7 +26,7 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
     private AcceGyro mAcceGyro;
     private GyroGestureRecognizer mRecognizer;
 
-    private NprNavigator mContent;
+    private NavigableContent mContent;
     private TextToSpeech mTts;
 
     // TODO: refactor the following and NavigableContent in terms of MEC -- Model Endu Controller
@@ -50,13 +50,13 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
             GyroGestureRecognizer.GyroGesture gesture = GyroGestureRecognizer.GyroGesture.valueOf(GyroGestureRecognizer.GyroGesture.class, intent.getStringExtra("VALUE"));
             switch (gesture) {
                 case UP:
-                    if (mContent.up()) {
+                    if (mContent.gotoParent()) {
                         mTts.speak((String) mContent.getContentDescription(), TextToSpeech.QUEUE_FLUSH, null);
                     } else
                         mTts.speak("Sorry. Cannot go up anymore.", TextToSpeech.QUEUE_FLUSH, null);
                     break;
                 case DOWN:
-                    if (mContent.down()) {
+                    if (mContent.gotoChild()) {
                         Object content = mContent.getContent();
                         if (content instanceof String[]) {
                             mTts.speak((String) mContent.getContentDescription() + ". Tilt left or right to choose.", TextToSpeech.QUEUE_FLUSH, null);
@@ -70,7 +70,7 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
                         mTts.speak("Sorry. Cannot go down anymore.", TextToSpeech.QUEUE_FLUSH, null);
                     break;
                 case LEFT:
-                    if (mContent.previous()) {
+                    if (mContent.gotoPreviousSibling()) {
                         Object content = mContent.getContent();
                         if (content instanceof String) {
                             mTts.speak((String) content, TextToSpeech.QUEUE_FLUSH, null);
@@ -81,7 +81,7 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
                         mTts.speak("Sorry. No more before this one.", TextToSpeech.QUEUE_FLUSH, null);
                     break;
                 case RIGHT:
-                    if (mContent.next()) {
+                    if (mContent.gotoNextSibling()) {
                         Object content = mContent.getContent();
                         if (content instanceof String) {
                             mTts.speak((String) content, TextToSpeech.QUEUE_FLUSH, null);
@@ -104,7 +104,7 @@ public class HapActivity extends Activity implements TextToSpeech.OnInitListener
     {
         super.onCreate(savedInstanceState);
 
-        mContent = new NprNavigator(this, getLoaderManager());
+        mContent = new NavigableContent(this, getLoaderManager());
         mTts = new TextToSpeech(this, this);
         mGraphView = new AcceGyroGraphView(this);
         mAcceGyro = new AcceGyro((SensorManager) getSystemService(SENSOR_SERVICE));

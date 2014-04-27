@@ -20,6 +20,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import ca.dragonflystudios.content.model.Model;
 import ca.dragonflystudios.content.service.Service;
@@ -113,6 +114,9 @@ public class Provider extends ContentProvider
                 for (int i = 0; i < size; i++)
                     results[i] = operations.get(i).apply(this, null, 0);
                 db.setTransactionSuccessful();
+                // TODO: fix up this freshness hack!
+                setFresh(mcd.collection.getId());
+                getContext().getContentResolver().notifyChange(uri, null);
             } catch (OperationApplicationException e) {
                 e.printStackTrace();
             } finally {
@@ -126,6 +130,8 @@ public class Provider extends ContentProvider
     @Override
     public boolean onCreate()
     {
+        mFresh = new HashSet<Integer>();
+
         for (Model model : Model.sModels) {
             SQLiteDatabase db = DatabaseHelper.initializeDatabase(getContext(), model);
             if (null == db)
@@ -148,7 +154,11 @@ public class Provider extends ContentProvider
         Cursor c = qBuilder.query(mcd.database, projection, selection, selectionArgs, null, null, sortOrder);
         c.setNotificationUri(getContext().getContentResolver(), uri);
 
-        requestSync(mcd, selection, selectionArgs, sortOrder);
+        if (isFresh(mcd.collection.getId()))
+            clearFresh(mcd.collection.getId());
+        else
+            requestSync(mcd, selection, selectionArgs, sortOrder);
+
         return c;
     }
 
@@ -164,7 +174,6 @@ public class Provider extends ContentProvider
 
     private void requestSync(UriMapper.MCD mcd, String selection, String[] selectionArgs, String sortOrder)
     {
-        // TODO; get etag and ims
         final Context context = getContext();
         final Intent intent = new Intent(context, Service.class);
         intent.putExtra(Service.KEY_COLLECTION_ID, mcd.collection.getId());
@@ -172,5 +181,22 @@ public class Provider extends ContentProvider
         intent.putExtra(Service.KEY_SELECTION_ARGS, selectionArgs);
         intent.putExtra(Service.KEY_SORT_ORDER, sortOrder);
         context.startService(intent);
+    }
+
+    private HashSet<Integer> mFresh;
+
+    private boolean isFresh(int collectionId)
+    {
+        return mFresh.contains(collectionId);
+    }
+
+    private void setFresh(int collectionId)
+    {
+        mFresh.add(collectionId);
+    }
+
+    private void clearFresh(int collectionId)
+    {
+        mFresh.remove(collectionId);
     }
 }
