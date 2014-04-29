@@ -3,6 +3,7 @@ package ca.dragonflystudios.hap;
 import android.app.LoaderManager;
 import android.content.Context;
 import android.content.CursorLoader;
+import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
 import android.os.Bundle;
@@ -10,6 +11,7 @@ import android.util.Log;
 
 import ca.dragonflystudios.content.model.Collection;
 import ca.dragonflystudios.content.model.Model;
+import ca.dragonflystudios.content.service.Service;
 import ca.dragonflystudios.hap.content.C;
 
 public class NavigableContent implements LoaderManager.LoaderCallbacks<Cursor>
@@ -56,10 +58,12 @@ public class NavigableContent implements LoaderManager.LoaderCallbacks<Cursor>
         switch (i) {
             case PROGRAMS_LOADER_ID:
                 Collection collection = Model.getModelByAuthority(C.NPR_AUTHORITY).getCollectionByName(C.COLLECTION_NAME_PROGRAMS);
+                requestSync(collection.getId(), null, null, null);
                 return new CursorLoader(mContext, collection.getUri(), collection.itemFieldNames, null, null, null);
             case PROGRAM_ITEMS_LOADER_ID:
                 String program_id = mProgramsCursor.getString(mProgramsCursor.getColumnIndex(C.field.id));
                 collection = Model.getModelByAuthority(C.NPR_AUTHORITY).getCollectionByName(C.COLLECTION_NAME_STORIES);
+                requestSync(collection.getId(), null, new String[] { program_id } , null);
                 return new CursorLoader(mContext, collection.getUri(), collection.itemFieldNames, C.field.program_id + " = " + program_id, null, null);
             default:
                 throw new RuntimeException("Invalid loader id: " + i);
@@ -226,5 +230,15 @@ public class NavigableContent implements LoaderManager.LoaderCallbacks<Cursor>
                 return shiftCursor(mCurrentProgramCursor, 1);
         }
         return false;
+    }
+
+    private void requestSync(int collectionId, String selection, String[] selectionArgs, String sortOrder)
+    {
+        final Intent intent = new Intent(mContext, Service.class);
+        intent.putExtra(Service.KEY_COLLECTION_ID, collectionId);
+        intent.putExtra(Service.KEY_SELECTION, selection);
+        intent.putExtra(Service.KEY_SELECTION_ARGS, selectionArgs);
+        intent.putExtra(Service.KEY_SORT_ORDER, sortOrder);
+        mContext.startService(intent);
     }
 }

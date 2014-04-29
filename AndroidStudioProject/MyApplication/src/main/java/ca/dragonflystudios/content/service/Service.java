@@ -91,7 +91,7 @@ public class Service extends IntentService
         if (contents.length > 0) {
 
             // WAIL: this deletes all old items ...
-            operations.add(ContentProviderOperation.newDelete(uri).withSelection(selection, selectionArgs).build());
+            operations.add(ContentProviderOperation.newDelete(uri).build());
 
             for (ContentValues cvs : contents)
                 operations.add(ContentProviderOperation.newInsert(uri).withValues(cvs).build());

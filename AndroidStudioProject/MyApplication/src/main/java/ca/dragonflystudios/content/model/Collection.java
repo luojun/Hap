@@ -48,10 +48,9 @@ public class Collection
 
     /* TODO: more sensible implementation of mapping selection to columnName and selectionArgs to query terms
      */
-    // The default implementation ignores selectionArgs
     public String getUrl(String[] selectionArgs)
     {
-        return url;
+        return String.format(url, selectionArgs);
     }
 
     protected void setModel(Model model, int collectionId)

@@ -1,7 +1,11 @@
 package ca.dragonflystudios.content.processor.json;
 
+import android.util.Log;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.MissingNode;
+
+import java.util.Arrays;
 
 import ca.dragonflystudios.content.processor.ContentPath;
 
@@ -35,6 +39,8 @@ public class JsonPath implements ContentPath
 
         for (int i = 0; i < path.getLength(); i++) {
             final Object step = path.get(i);
+            Log.d(JsonPath.class.getName(), "currentNode:\n\t" + currentNode.toString());
+            Log.d(JsonPath.class.getName(), "JsonPath:\n\t" + path.toString());
             if (step instanceof String)
                 nextNode = currentNode.get((String) step);
             else if (step instanceof Integer)
@@ -47,5 +53,11 @@ public class JsonPath implements ContentPath
         }
 
         return nextNode;
+    }
+
+    @Override
+    public String toString()
+    {
+        return Arrays.toString(mPath);
     }
 }
